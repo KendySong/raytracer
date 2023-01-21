@@ -1,0 +1,4 @@
+﻿  Graphics.cpp
+C:\Users\kndys\Desktop\raytracer\src\Graphics\Graphics.cpp(15,12): warning C4244: 'argument' : conversion de 'time_t' en 'unsigned int', perte possible de données
+C:\Users\kndys\Desktop\raytracer\src\Graphics\Graphics.cpp(36,40): warning C4267: 'argument' : conversion de 'size_t' en 'int', perte possible de données
+  raytracer.vcxproj -> C:\Users\kndys\Desktop\raytracer\build\bin\Debug\raytracer.exe

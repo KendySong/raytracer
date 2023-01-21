@@ -1,0 +1,21 @@
+﻿  imgui.cpp
+  imgui_demo.cpp
+  imgui_draw.cpp
+  imgui_impl_sdl.cpp
+  imgui_impl_sdlrenderer.cpp
+  imgui_tables.cpp
+  imgui_widgets.cpp
+  Application.cpp
+  Graphics.cpp
+C:\Users\kndys\Desktop\raytracer\src\Graphics\Graphics.cpp(15,12): warning C4244: 'argument' : conversion de 'time_t' en 'unsigned int', perte possible de données
+C:\Users\kndys\Desktop\raytracer\src\Graphics\Graphics.cpp(33,40): warning C4267: 'argument' : conversion de 'size_t' en 'int', perte possible de données
+  Ray.cpp
+  Main.cpp
+  Math.cpp
+C:\Users\kndys\Desktop\raytracer\src\Math\Math.cpp(92,18): warning C4244: 'return' : conversion de 'double' en 'float', perte possible de données
+  Vec2.cpp
+  Vec3.cpp
+  Timer.cpp
+C:\Users\kndys\Desktop\raytracer\src\Timer.cpp(21,89): warning C4244: 'return' : conversion de 'double' en 'float', perte possible de données
+  Génération de code en cours...
+  raytracer.vcxproj -> C:\Users\kndys\Desktop\raytracer\build\bin\Release\raytracer.exe

@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="libraries">
+      <UniqueIdentifier>{22796F86-8EE3-23FD-D721-D5A243CB0152}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="libraries\include">
+      <UniqueIdentifier>{95A2ECC9-01B9-EA5F-4A30-7681B685BBE7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="libraries\include\ImGui">
+      <UniqueIdentifier>{7FF30B26-EB2A-54BD-F434-B8E060EB7AB6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src">
+      <UniqueIdentifier>{2DAB880B-99B4-887C-2230-9F7C8E38947C}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\Graphics">
+      <UniqueIdentifier>{0D564864-F9B8-D708-A23E-10BF8E80A38B}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\Math">
+      <UniqueIdentifier>{261422CF-12E1-7CDA-3BFA-6A822726B268}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\src\Application.hpp">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\Graphics\Graphics.hpp">
+      <Filter>src\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\Graphics\Ray.hpp">
+      <Filter>src\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\Math\Math.hpp">
+      <Filter>src\Math</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\Math\Vec2.hpp">
+      <Filter>src\Math</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\Math\Vec3.hpp">
+      <Filter>src\Math</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\Settings.hpp">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\Timer.hpp">
+      <Filter>src</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\libraries\include\ImGui\imgui.cpp">
+      <Filter>libraries\include\ImGui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\libraries\include\ImGui\imgui_demo.cpp">
+      <Filter>libraries\include\ImGui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\libraries\include\ImGui\imgui_draw.cpp">
+      <Filter>libraries\include\ImGui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\libraries\include\ImGui\imgui_impl_sdl.cpp">
+      <Filter>libraries\include\ImGui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\libraries\include\ImGui\imgui_impl_sdlrenderer.cpp">
+      <Filter>libraries\include\ImGui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\libraries\include\ImGui\imgui_tables.cpp">
+      <Filter>libraries\include\ImGui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\libraries\include\ImGui\imgui_widgets.cpp">
+      <Filter>libraries\include\ImGui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\Application.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\Graphics\Graphics.cpp">
+      <Filter>src\Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\Graphics\Ray.cpp">
+      <Filter>src\Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\Main.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\Math\Math.cpp">
+      <Filter>src\Math</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\Math\Vec2.cpp">
+      <Filter>src\Math</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\Math\Vec3.cpp">
+      <Filter>src\Math</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\Timer.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+  </ItemGroup>
+</Project>
