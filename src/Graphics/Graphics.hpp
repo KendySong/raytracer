@@ -1,12 +1,19 @@
 #pragma once
+#include <vector>
+
 #include <SDL/SDL.h>
+
+#include "Ray.hpp"
+#include "Sphere.hpp"
+#include "../Math/Vec3.hpp"
 
 class Graphics
 {
 public :
 	Graphics(SDL_Window* window, SDL_Renderer* graphics);
 	void clear();
-	void draw();
+	void draw(const Sphere& sphere);
+
 	void drawGui(int fps);
 	void render();
 

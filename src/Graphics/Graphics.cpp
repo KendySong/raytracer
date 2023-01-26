@@ -8,11 +8,12 @@
 #include <ImGui/imgui_impl_sdlrenderer.h>
 
 #include "Graphics.hpp"
+#include "../Math/Math.hpp"
 #include "../Settings.hpp"
 
 Graphics::Graphics(SDL_Window* window, SDL_Renderer* graphics) : p_window(window), p_graphics(graphics)
 {
-	srand(time(nullptr));
+	
 }
 
 void Graphics::clear()
@@ -26,16 +27,32 @@ void Graphics::clear()
 	ImGui::NewFrame();
 }
 
-void Graphics::draw()
+void Graphics::draw(const Sphere& sphere)
 {
 	for (size_t y = 0; y < resolutionY; y++)
 	{
 		for (size_t x = 0; x < resolutionX; x++)
 		{
-			
+			Vec2 coord((float)x / (float)resolutionX, (float)y / (float)resolutionY);
+			coord = coord * 2 - 1;
 
-			SDL_SetRenderDrawColor(p_graphics, rand() % 255, rand() % 255, rand() % 255, 255);
-			SDL_RenderDrawPoint(p_graphics, x, y);
+			float a, b, c, discriminant;
+			Ray ray(Vec3(0, 0, -10), Vec3(coord.x, coord.y, -1));
+			a = Math::dot(ray.direction, ray.direction);
+			b = 2 * Math::dot(ray.origin, ray.direction);
+			c = Math::dot(ray.origin, ray.origin) - pow(sphere.radius, 2);
+
+			discriminant = pow(b, 2) - 4 * a * c;
+			if (discriminant >= 0)
+			{
+				SDL_SetRenderDrawColor(p_graphics, 0, 255, 0, 255);
+			}
+			else
+			{
+				SDL_SetRenderDrawColor(p_graphics, 0, 0, 0, 255);
+			}
+
+			SDL_RenderDrawPoint(p_graphics, x, y);	
 		}
 	}
 }

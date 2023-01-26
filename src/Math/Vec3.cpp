@@ -7,6 +7,13 @@ Vec3::Vec3()
     this->z = 0;
 }
 
+Vec3::Vec3(float all)
+{
+    this->x = all;
+    this->y = all;
+    this->z = all;
+}
+
 Vec3::Vec3(float x, float y, float z)
 {
     this->x = x;
