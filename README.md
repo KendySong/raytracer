@@ -1,2 +1,2 @@
 # raytracer
-Simple raytracing engine
+Simple raytracing engine with SDL2

@@ -15,6 +15,7 @@ Graphics::Graphics(SDL_Window* window, SDL_Renderer* graphics) : p_window(window
 {
 	m_showResolutionX = resolutionX;
 	m_showResolutionY = resolutionY;
+	m_aspectRatio = (float)resolutionX / (float)resolutionY;
 
 	p_frontBuffer = new std::uint32_t[0];
 	p_backBuffer = new std::uint32_t[0];
@@ -40,6 +41,7 @@ void Graphics::draw(std::uint32_t* backBuffer, const Sphere& sphere)
 		{
 			Vec2 coord((float)x / (float)resolutionX, (float)y / (float)resolutionY);
 			coord = coord * 2 - 1;
+			coord.x *= m_aspectRatio;
 
 			//ax^2 + bx + c
 			float a, b, c, discriminant;
@@ -57,7 +59,7 @@ void Graphics::draw(std::uint32_t* backBuffer, const Sphere& sphere)
 			else
 			{
 				backBuffer[y * resolutionX + x] = 0;
-			}		
+			}
 		}
 	}
 }
@@ -65,19 +67,9 @@ void Graphics::draw(std::uint32_t* backBuffer, const Sphere& sphere)
 void Graphics::drawGui(int fps, const Sphere& sphere)
 {
 	SDL_RenderSetLogicalSize(p_graphics, SCREEN_X, SCREEN_Y);
-
-	ImGui::Begin("Render infos");
+	ImGui::Begin("Render");
 		ImGui::Text("%i FPS", fps);
-		ImGui::InputInt2("Resolution", &m_showResolutionX);
-
-		if (ImGui::Button("Apply"))
-		{
-			resolutionX = m_showResolutionX;
-			resolutionY = m_showResolutionY;
-			this->resetFrameBuffer();
-		}
-
-		if (ImGui::Button("Render"))
+		if (ImGui::Button("Render frame"))
 		{
 			//Draw sphere and swap buffers
 			this->draw(p_backBuffer, sphere);
@@ -85,6 +77,19 @@ void Graphics::drawGui(int fps, const Sphere& sphere)
 			std::uint32_t* tempBuffer = p_frontBuffer;
 			p_frontBuffer = p_backBuffer;
 			p_backBuffer = tempBuffer;
+		}		
+
+		ImGui::TextUnformatted("Resolution");
+		ImGui::SameLine();
+		ImGui::PushItemWidth(-1);
+		ImGui::InputInt2("##",  &m_showResolutionX);
+		ImGui::PopItemWidth();
+		if (ImGui::Button("Apply"))
+		{
+			resolutionX = m_showResolutionX;
+			resolutionY = m_showResolutionY;
+			m_aspectRatio = (float)resolutionX / (float)resolutionY;
+			this->resetFrameBuffer();
 		}
 	ImGui::End();
 }

@@ -53,10 +53,7 @@ int Application::run()
 			}
 		}
 
-		//Update
 		this->countFPS();	
-		float deltaTime = m_deltaTimeChrono.getElapsedTime();
-		m_deltaTimeChrono.restart();
 
 		//Render frame
 		m_graphics->clear();

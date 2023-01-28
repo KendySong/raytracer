@@ -33,5 +33,5 @@ private :
 
 	int m_showResolutionX;
 	int m_showResolutionY;
-
+	float m_aspectRatio;
 };
