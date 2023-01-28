@@ -13,21 +13,26 @@
 
 Graphics::Graphics(SDL_Window* window, SDL_Renderer* graphics) : p_window(window), p_graphics(graphics)
 {
-	
+	m_showResolutionX = resolutionX;
+	m_showResolutionY = resolutionY;
+
+	p_frontBuffer = new std::uint32_t[0];
+	p_backBuffer = new std::uint32_t[0];
+	this->resetFrameBuffer();
 }
 
 void Graphics::clear()
 {
-	//Clear
 	SDL_RenderSetLogicalSize(p_graphics, resolutionX, resolutionY);
 	SDL_SetRenderDrawColor(p_graphics, 0, 0, 0, 255);
 	SDL_RenderClear(p_graphics);
+
 	ImGui_ImplSDLRenderer_NewFrame();
 	ImGui_ImplSDL2_NewFrame(p_window);
 	ImGui::NewFrame();
 }
 
-void Graphics::draw(const Sphere& sphere)
+void Graphics::draw(std::uint32_t* backBuffer, const Sphere& sphere)
 {
 	for (size_t y = 0; y < resolutionY; y++)
 	{
@@ -36,6 +41,7 @@ void Graphics::draw(const Sphere& sphere)
 			Vec2 coord((float)x / (float)resolutionX, (float)y / (float)resolutionY);
 			coord = coord * 2 - 1;
 
+			//ax^2 + bx + c
 			float a, b, c, discriminant;
 			Ray ray(Vec3(0, 0, -10), Vec3(coord.x, coord.y, -1));
 			a = Math::dot(ray.direction, ray.direction);
@@ -43,31 +49,51 @@ void Graphics::draw(const Sphere& sphere)
 			c = Math::dot(ray.origin, ray.origin) - pow(sphere.radius, 2);
 
 			discriminant = pow(b, 2) - 4 * a * c;
+			std::uint32_t pixelColor;
 			if (discriminant >= 0)
 			{
-				SDL_SetRenderDrawColor(p_graphics, 0, 255, 0, 255);
+				backBuffer[y * resolutionX + x] = sphere.color;
 			}
 			else
 			{
-				SDL_SetRenderDrawColor(p_graphics, 0, 0, 0, 255);
-			}
-
-			SDL_RenderDrawPoint(p_graphics, x, y);	
+				backBuffer[y * resolutionX + x] = 0;
+			}		
 		}
 	}
 }
 
-void Graphics::drawGui(int fps)
+void Graphics::drawGui(int fps, const Sphere& sphere)
 {
 	SDL_RenderSetLogicalSize(p_graphics, SCREEN_X, SCREEN_Y);
+
 	ImGui::Begin("Render infos");
-	ImGui::Text("%i FPS", fps);
-	ImGui::InputInt2("Resolution", &resolutionX);
+		ImGui::Text("%i FPS", fps);
+		ImGui::InputInt2("Resolution", &m_showResolutionX);
+
+		if (ImGui::Button("Apply"))
+		{
+			resolutionX = m_showResolutionX;
+			resolutionY = m_showResolutionY;
+			this->resetFrameBuffer();
+		}
+
+		if (ImGui::Button("Render"))
+		{
+			//Draw sphere and swap buffers
+			this->draw(p_backBuffer, sphere);
+
+			std::uint32_t* tempBuffer = p_frontBuffer;
+			p_frontBuffer = p_backBuffer;
+			p_backBuffer = tempBuffer;
+		}
 	ImGui::End();
 }
 
 void Graphics::render()
 {
+	SDL_UpdateTexture(p_frontTex, NULL, p_frontBuffer, resolutionX * sizeof std::uint32_t);
+	SDL_RenderCopy(p_graphics, p_frontTex, NULL, NULL);
+
 	ImGui::Render();
 	ImGui_ImplSDLRenderer_RenderDrawData(ImGui::GetDrawData());
 	SDL_RenderPresent(p_graphics);
@@ -76,4 +102,16 @@ void Graphics::render()
 SDL_Renderer* Graphics::getRenderer() noexcept
 {
 	return p_graphics;
+}
+
+void Graphics::resetFrameBuffer()
+{
+	delete p_frontBuffer;
+	delete p_backBuffer;
+	p_frontBuffer = new std::uint32_t[resolutionX * resolutionY];
+	p_backBuffer = new std::uint32_t[resolutionX * resolutionY];
+	memset(p_frontBuffer, 0, resolutionX * resolutionY * sizeof std::uint32_t);
+	memset(p_backBuffer, 0, resolutionX * resolutionY * sizeof std::uint32_t);
+	p_frontTex = SDL_CreateTexture(p_graphics, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STREAMING, resolutionX, resolutionY);
+	p_backTex = SDL_CreateTexture(p_graphics, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STREAMING, resolutionX, resolutionY);
 }

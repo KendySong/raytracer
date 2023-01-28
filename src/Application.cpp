@@ -40,6 +40,8 @@ Application* Application::instance()
 
 int Application::run()
 {
+	int x = 0;
+
 	while (m_isRunning)
 	{
 		while (SDL_PollEvent(&m_event))
@@ -58,9 +60,8 @@ int Application::run()
 
 		//Render frame
 		m_graphics->clear();
-		m_graphics->draw(m_spheres[0]);
-		m_graphics->drawGui(m_displayFPS);
-		m_graphics->render();
+		m_graphics->drawGui(m_displayFPS, m_spheres[0]);
+		m_graphics->render();		
 	}
 
 	delete p_app;
