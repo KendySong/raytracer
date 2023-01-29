@@ -40,8 +40,6 @@ Application* Application::instance()
 
 int Application::run()
 {
-	int x = 0;
-
 	while (m_isRunning)
 	{
 		while (SDL_PollEvent(&m_event))
@@ -53,11 +51,9 @@ int Application::run()
 			}
 		}
 
-		this->countFPS();	
-
 		//Render frame
 		m_graphics->clear();
-		m_graphics->drawGui(m_displayFPS, m_spheres[0]);
+		m_graphics->drawGui(m_spheres[0]);
 		m_graphics->render();		
 	}
 

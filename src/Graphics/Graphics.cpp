@@ -45,7 +45,7 @@ void Graphics::draw(std::uint32_t* backBuffer, const Sphere& sphere)
 
 			//ax^2 + bx + c
 			float a, b, c, discriminant;
-			Ray ray(Vec3(0, 0, -10), Vec3(coord.x, coord.y, -1));
+			Ray ray(Vec3(pos.x, pos.y, -10), Vec3(coord.x, coord.y, -1));
 			a = Math::dot(ray.direction, ray.direction);
 			b = 2 * Math::dot(ray.origin, ray.direction);
 			c = Math::dot(ray.origin, ray.origin) - pow(sphere.radius, 2);
@@ -54,6 +54,9 @@ void Graphics::draw(std::uint32_t* backBuffer, const Sphere& sphere)
 			std::uint32_t pixelColor;
 			if (discriminant >= 0)
 			{
+				float t = (-b + sqrt(discriminant)) / (2 * a);
+
+				//backBuffer[y * resolutionX + x] = this->getColor(255 - abs(t) * 25, 0, 0);
 				backBuffer[y * resolutionX + x] = sphere.color;
 			}
 			else
@@ -64,15 +67,17 @@ void Graphics::draw(std::uint32_t* backBuffer, const Sphere& sphere)
 	}
 }
 
-void Graphics::drawGui(int fps, const Sphere& sphere)
+void Graphics::drawGui(const Sphere& sphere)
 {
 	SDL_RenderSetLogicalSize(p_graphics, SCREEN_X, SCREEN_Y);
 	ImGui::Begin("Render");
-		ImGui::Text("%i FPS", fps);
+		ImGui::Text("ms : %f", m_timeToRender);
 		if (ImGui::Button("Render frame"))
 		{
 			//Draw sphere and swap buffers
+			m_frameChrono.restart();		
 			this->draw(p_backBuffer, sphere);
+			m_timeToRender = m_frameChrono.getElapsedTime() * 1000;
 
 			std::uint32_t* tempBuffer = p_frontBuffer;
 			p_frontBuffer = p_backBuffer;
@@ -91,6 +96,8 @@ void Graphics::drawGui(int fps, const Sphere& sphere)
 			m_aspectRatio = (float)resolutionX / (float)resolutionY;
 			this->resetFrameBuffer();
 		}
+
+		ImGui::InputFloat2("dsadas", &pos.x);
 	ImGui::End();
 }
 
@@ -102,6 +109,15 @@ void Graphics::render()
 	ImGui::Render();
 	ImGui_ImplSDLRenderer_RenderDrawData(ImGui::GetDrawData());
 	SDL_RenderPresent(p_graphics);
+}
+
+std::uint32_t Graphics::getColor(std::uint8_t r, std::uint8_t g, std::uint8_t b)
+{
+	std::uint32_t red = (0x000000FF & r) << 16;
+	std::uint32_t green = (0x000000FF & g) << 8;
+	std::uint32_t blue = (0x000000FF & b);
+	std::uint32_t result = 0xFF000000 | red | green | blue;
+	return result;
 }
 
 SDL_Renderer* Graphics::getRenderer() noexcept

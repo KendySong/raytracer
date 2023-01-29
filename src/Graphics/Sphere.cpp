@@ -1,3 +1,4 @@
+#include "Graphics.hpp"
 #include "Sphere.hpp"
 
 Sphere::Sphere(Vec3 position, float radius, std::uint32_t color)
@@ -9,7 +10,7 @@ Sphere::Sphere(Vec3 position, float radius, std::uint32_t color)
 
 Sphere::Sphere(Vec3 position, float radius)
 {
-    this->color = 0xFFFF0000;
+    this->color = Graphics::getColor(255, 0, 255);
     this->position = position;
     this->radius = radius;
 }
