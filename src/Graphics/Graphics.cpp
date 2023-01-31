@@ -20,6 +20,9 @@ Graphics::Graphics(SDL_Window* window, SDL_Renderer* graphics) : p_window(window
 	p_frontBuffer = new std::uint32_t[0];
 	p_backBuffer = new std::uint32_t[0];
 	this->resetFrameBuffer();
+
+	m_lightDir = Vec3(-1, -1, 1);
+	m_cameraPosition = Vec3(0, 0, -10);
 }
 
 void Graphics::clear()
@@ -45,19 +48,36 @@ void Graphics::draw(std::uint32_t* backBuffer, const Sphere& sphere)
 
 			//ax^2 + bx + c
 			float a, b, c, discriminant;
-			Ray ray(Vec3(pos.x, pos.y, -10), Vec3(coord.x, coord.y, -1));
+			Ray ray(Vec3(-m_cameraPosition.x, m_cameraPosition.y, m_cameraPosition.z), Math::normalize(Vec3(coord.x, coord.y, -1)));
 			a = Math::dot(ray.direction, ray.direction);
 			b = 2 * Math::dot(ray.origin, ray.direction);
 			c = Math::dot(ray.origin, ray.origin) - pow(sphere.radius, 2);
 
 			discriminant = pow(b, 2) - 4 * a * c;
 			std::uint32_t pixelColor;
-			if (discriminant >= 0)
-			{
-				float t = (-b + sqrt(discriminant)) / (2 * a);
 
-				//backBuffer[y * resolutionX + x] = this->getColor(255 - abs(t) * 25, 0, 0);
-				backBuffer[y * resolutionX + x] = sphere.color;
+			if (discriminant >= 0)
+			{	
+				float tp = (-b + sqrt(discriminant)) / (2 * a);
+				float tm = (-b - sqrt(discriminant)) / (2 * a);
+				Vec3 atp = ray.at(tp);
+				Vec3 atm = ray.at(tm);
+
+				Vec3 normal = atp - Vec3(0, 0, 0);
+				float intensity = Math::dot(Math::normalize(normal), Math::normalize(-m_lightDir));
+				float intensityCheck = intensity;
+
+				if (intensityCheck < 0)
+				{
+					intensityCheck = 0;
+				}
+				else if (intensityCheck > 1)
+				{
+					intensityCheck = 1;
+				}
+
+				std::uint8_t colorIntensity = intensityCheck * 255;	
+				backBuffer[y * resolutionX + x] = this->getColor(colorIntensity, 0, 0);
 			}
 			else
 			{
@@ -72,6 +92,7 @@ void Graphics::drawGui(const Sphere& sphere)
 	SDL_RenderSetLogicalSize(p_graphics, SCREEN_X, SCREEN_Y);
 	ImGui::Begin("Render");
 		ImGui::Text("ms : %f", m_timeToRender);
+
 		if (ImGui::Button("Render frame"))
 		{
 			//Draw sphere and swap buffers
@@ -97,7 +118,8 @@ void Graphics::drawGui(const Sphere& sphere)
 			this->resetFrameBuffer();
 		}
 
-		ImGui::InputFloat2("dsadas", &pos.x);
+		ImGui::InputFloat3("Camera position", &m_cameraPosition.x);
+		ImGui::InputFloat3("Light position", &m_lightDir.x);
 	ImGui::End();
 }
 

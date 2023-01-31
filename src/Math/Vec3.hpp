@@ -17,6 +17,8 @@ public :
     float z;
 };
 
+Vec3 operator-(const Vec3& vec) noexcept;
+
 Vec3 operator+(const Vec3& vec1, const Vec3& vec2) noexcept;
 Vec3 operator-(const Vec3& vec1, const Vec3& vec2) noexcept;
 Vec3 operator*(const Vec3& vec1, const Vec3& vec2) noexcept;

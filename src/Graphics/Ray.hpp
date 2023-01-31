@@ -6,7 +6,7 @@ struct Ray
 public :
 	Ray() = default;
 	Ray(Vec3 origin, Vec3 direction);
-	Vec3 at(float scalar);
+	Vec3 at(float scalar) const;
 
 	Vec3 origin;
 	Vec3 direction;

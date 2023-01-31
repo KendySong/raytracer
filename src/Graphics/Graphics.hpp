@@ -40,5 +40,6 @@ private :
 	int m_showResolutionY;
 	float m_timeToRender;
 
-	Vec3 pos;
+	Vec3 m_cameraPosition;
+	Vec3 m_lightDir;
 };

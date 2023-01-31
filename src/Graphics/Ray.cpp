@@ -6,7 +6,7 @@ Ray::Ray(Vec3 origin, Vec3 direction)
 	this->direction = direction;
 }
 
-Vec3 Ray::at(float scalar)
+Vec3 Ray::at(float scalar) const
 {
 	return origin + direction * scalar;
 }

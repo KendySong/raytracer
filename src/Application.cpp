@@ -26,7 +26,7 @@ Application::Application()
 	ImGui_ImplSDLRenderer_Init(m_graphics->getRenderer());
 
 	//Init world
-	m_spheres.push_back(Sphere(Vec3(0, 0, 0), 2));
+	m_spheres.push_back(Sphere(Vec3(0, 0, 0), 4));
 }
 
 Application* Application::instance()
