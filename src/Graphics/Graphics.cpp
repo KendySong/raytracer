@@ -21,7 +21,7 @@ Graphics::Graphics(SDL_Window* window, SDL_Renderer* graphics) : p_window(window
 	p_backBuffer = new std::uint32_t[0];
 	this->resetFrameBuffer();
 
-	m_lightDir = Vec3(-1, -1, 1);
+	m_lightDir = Vec3(-1, -1, -1);
 	m_cameraPosition = Vec3(0, 0, -10);
 }
 
@@ -38,11 +38,14 @@ void Graphics::clear()
 
 void Graphics::draw(std::uint32_t* backBuffer, const Sphere& sphere)
 {
-	for (size_t y = 0; y < resolutionY; y++)
+	float fresolutionX = (float)resolutionX;
+	float fresolutionY = (float)resolutionY;
+
+	for (int y = 0; y < resolutionY; y++)
 	{
-		for (size_t x = 0; x < resolutionX; x++)
+		for (int x = 0; x < resolutionX; x++)
 		{
-			Vec2 coord((float)x / (float)resolutionX, (float)y / (float)resolutionY);
+			Vec2 coord(x / fresolutionX, y / fresolutionY);
 			coord = coord * 2 - 1;
 			coord.x *= m_aspectRatio;
 
@@ -58,12 +61,12 @@ void Graphics::draw(std::uint32_t* backBuffer, const Sphere& sphere)
 
 			if (discriminant >= 0)
 			{	
-				float tp = (-b + sqrt(discriminant)) / (2 * a);
+				//Compute scalar for getting intersection point
 				float tm = (-b - sqrt(discriminant)) / (2 * a);
-				Vec3 atp = ray.at(tp);
-				Vec3 atm = ray.at(tm);
+				Vec3 hitMinus = ray.at(tm);
 
-				Vec3 normal = atp - Vec3(0, 0, 0);
+				//Compute normal vector and light intensity
+				Vec3 normal = hitMinus - Vec3(0, 0, 0);
 				float intensity = Math::dot(Math::normalize(normal), Math::normalize(-m_lightDir));
 				float intensityCheck = intensity;
 
@@ -81,7 +84,7 @@ void Graphics::draw(std::uint32_t* backBuffer, const Sphere& sphere)
 			}
 			else
 			{
-				backBuffer[y * resolutionX + x] = 0;
+				backBuffer[y * resolutionX + x] = this->getColor(0, 170, 255);
 			}
 		}
 	}
@@ -119,7 +122,7 @@ void Graphics::drawGui(const Sphere& sphere)
 		}
 
 		ImGui::InputFloat3("Camera position", &m_cameraPosition.x);
-		ImGui::InputFloat3("Light position", &m_lightDir.x);
+		ImGui::InputFloat3("Light position", &m_lightDir.x);	
 	ImGui::End();
 }
 
