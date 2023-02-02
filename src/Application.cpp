@@ -27,6 +27,7 @@ Application::Application()
 
 	//Init world
 	m_spheres.push_back(Sphere(Vec3(0, 0, 0), 4));
+	m_graphics->setSpheres(m_spheres);
 }
 
 Application* Application::instance()

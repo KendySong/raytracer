@@ -21,8 +21,9 @@ Graphics::Graphics(SDL_Window* window, SDL_Renderer* graphics) : p_window(window
 	p_backBuffer = new std::uint32_t[0];
 	this->resetFrameBuffer();
 
-	m_lightDir = Vec3(-1, -1, -1);
+	m_lightDir = Vec3(-1, -1, 1);
 	m_cameraPosition = Vec3(0, 0, -10);
+	m_renderOnce = true;
 }
 
 void Graphics::clear()
@@ -62,8 +63,8 @@ void Graphics::draw(std::uint32_t* backBuffer, const Sphere& sphere)
 			if (discriminant >= 0)
 			{	
 				//Compute scalar for getting intersection point
-				float tm = (-b - sqrt(discriminant)) / (2 * a);
-				Vec3 hitMinus = ray.at(tm);
+				float t = (-b + sqrt(discriminant)) / (2 * a);
+				Vec3 hitMinus = ray.at(t);
 
 				//Compute normal vector and light intensity
 				Vec3 normal = hitMinus - Vec3(0, 0, 0);
@@ -95,34 +96,38 @@ void Graphics::drawGui(const Sphere& sphere)
 	SDL_RenderSetLogicalSize(p_graphics, SCREEN_X, SCREEN_Y);
 	ImGui::Begin("Render");
 		ImGui::Text("ms : %f", m_timeToRender);
+		ImGui::Checkbox("Render frame per frame", &m_renderOnce);
 
-		if (ImGui::Button("Render frame"))
+		if (!m_renderOnce)
 		{
-			//Draw sphere and swap buffers
-			m_frameChrono.restart();		
-			this->draw(p_backBuffer, sphere);
-			m_timeToRender = m_frameChrono.getElapsedTime() * 1000;
+			this->drawSwap();
+		}
+		else
+		{
+			if (ImGui::Button("Render frame"))
+			{
+				this->drawSwap();
+			}
+		}
 
-			std::uint32_t* tempBuffer = p_frontBuffer;
-			p_frontBuffer = p_backBuffer;
-			p_backBuffer = tempBuffer;
-		}		
+		ImGui::InputFloat3("Camera position", &m_cameraPosition.x);
+		ImGui::InputFloat3("Light position", &m_lightDir.x);	
 
 		ImGui::TextUnformatted("Resolution");
 		ImGui::SameLine();
 		ImGui::PushItemWidth(-1);
-		ImGui::InputInt2("##",  &m_showResolutionX);
+		ImGui::InputInt2("##", &m_showResolutionX);
 		ImGui::PopItemWidth();
-		if (ImGui::Button("Apply"))
+		
+		
+
+		if (ImGui::Button("Apply resolution"))
 		{
 			resolutionX = m_showResolutionX;
 			resolutionY = m_showResolutionY;
 			m_aspectRatio = (float)resolutionX / (float)resolutionY;
 			this->resetFrameBuffer();
 		}
-
-		ImGui::InputFloat3("Camera position", &m_cameraPosition.x);
-		ImGui::InputFloat3("Light position", &m_lightDir.x);	
 	ImGui::End();
 }
 
@@ -150,6 +155,11 @@ SDL_Renderer* Graphics::getRenderer() noexcept
 	return p_graphics;
 }
 
+void Graphics::setSpheres(std::vector<Sphere>& spheres)
+{
+	m_spheres = spheres;
+}
+
 void Graphics::resetFrameBuffer()
 {
 	delete p_frontBuffer;
@@ -160,4 +170,16 @@ void Graphics::resetFrameBuffer()
 	memset(p_backBuffer, 0, resolutionX * resolutionY * sizeof std::uint32_t);
 	p_frontTex = SDL_CreateTexture(p_graphics, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STREAMING, resolutionX, resolutionY);
 	p_backTex = SDL_CreateTexture(p_graphics, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STREAMING, resolutionX, resolutionY);
+}
+
+void Graphics::drawSwap()
+{
+	//Draw sphere and swap buffers
+	m_frameChrono.restart();
+	this->draw(p_backBuffer, m_spheres[0]);
+	m_timeToRender = m_frameChrono.getElapsedTime() * 1000;
+
+	std::uint32_t* tempBuffer = p_frontBuffer;
+	p_frontBuffer = p_backBuffer;
+	p_backBuffer = tempBuffer;
 }
