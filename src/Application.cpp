@@ -16,7 +16,8 @@ Application::Application()
 	SDL_Init(SDL_INIT_EVERYTHING);
 
 	p_window = SDL_CreateWindow("Raytracing Engine", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, SCREEN_X, SCREEN_Y, SDL_WINDOW_SHOWN);
-	m_graphics = new Graphics(p_window, SDL_CreateRenderer(p_window, -1, 0));
+
+	m_graphics = new Graphics(p_window, SDL_CreateRenderer(p_window, -1, 0), &m_camera);
 	SDL_RenderSetLogicalSize(m_graphics->getRenderer(), resolutionX, resolutionY);
 
 	//Init imgui
@@ -28,6 +29,7 @@ Application::Application()
 	//Init world
 	m_spheres.push_back(Sphere(Vec3(0, 0, 0), 4));
 	m_graphics->setSpheres(m_spheres);
+	m_camera = Camera(Vec3(0, 0, -10), 10, 1);
 }
 
 Application* Application::instance()
@@ -52,9 +54,15 @@ int Application::run()
 			}
 		}
 
+
+		float deltaTime = m_deltaTimeChrono.getElapsedTime();
+		m_deltaTimeChrono.restart();
+
+		m_camera.processMovement(deltaTime);
+
 		//Render frame
 		m_graphics->clear();
-		m_graphics->drawGui(m_spheres[0]);
+		m_graphics->drawGui();
 		m_graphics->render();		
 	}
 

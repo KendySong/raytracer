@@ -11,7 +11,7 @@
 #include "../Math/Math.hpp"
 #include "../Settings.hpp"
 
-Graphics::Graphics(SDL_Window* window, SDL_Renderer* graphics) : p_window(window), p_graphics(graphics)
+Graphics::Graphics(SDL_Window* window, SDL_Renderer* graphics, Camera* camera) : p_window(window), p_graphics(graphics), p_camera(camera)
 {
 	m_showResolutionX = resolutionX;
 	m_showResolutionY = resolutionY;
@@ -22,8 +22,7 @@ Graphics::Graphics(SDL_Window* window, SDL_Renderer* graphics) : p_window(window
 	this->resetFrameBuffer();
 
 	m_lightDir = Vec3(-1, -1, 1);
-	m_cameraPosition = Vec3(0, 0, -10);
-	m_renderOnce = true;
+	m_renderOnce = false;
 }
 
 void Graphics::clear()
@@ -52,7 +51,7 @@ void Graphics::draw(std::uint32_t* backBuffer, const Sphere& sphere)
 
 			//ax^2 + bx + c
 			float a, b, c, discriminant;
-			Ray ray(Vec3(-m_cameraPosition.x, m_cameraPosition.y, m_cameraPosition.z), Math::normalize(Vec3(coord.x, coord.y, -1)));
+			Ray ray(Vec3(p_camera->position.x, p_camera->position.y, p_camera->position.z), Math::normalize(Vec3(coord.x, coord.y, -1)));
 			a = Math::dot(ray.direction, ray.direction);
 			b = 2 * Math::dot(ray.origin, ray.direction);
 			c = Math::dot(ray.origin, ray.origin) - pow(sphere.radius, 2);
@@ -91,7 +90,7 @@ void Graphics::draw(std::uint32_t* backBuffer, const Sphere& sphere)
 	}
 }
 
-void Graphics::drawGui(const Sphere& sphere)
+void Graphics::drawGui()
 {
 	SDL_RenderSetLogicalSize(p_graphics, SCREEN_X, SCREEN_Y);
 	ImGui::Begin("Render");
@@ -109,18 +108,22 @@ void Graphics::drawGui(const Sphere& sphere)
 				this->drawSwap();
 			}
 		}
+		ImGui::Separator();
 
-		ImGui::InputFloat3("Camera position", &m_cameraPosition.x);
-		ImGui::InputFloat3("Light position", &m_lightDir.x);	
+		ImGui::TextUnformatted("Camera");	
+		ImGui::InputFloat3("Position", &p_camera->position.x);
+		ImGui::SliderFloat("Speed", &p_camera->speed, 1, 50);
 
-		ImGui::TextUnformatted("Resolution");
-		ImGui::SameLine();
-		ImGui::PushItemWidth(-1);
-		ImGui::InputInt2("##", &m_showResolutionX);
-		ImGui::PopItemWidth();
-		
-		
+		ImGui::Separator();
 
+		ImGui::TextUnformatted("Light");
+		ImGui::PushID(0);
+		ImGui::InputFloat3("Position", &m_lightDir.x);	
+		ImGui::PopID();
+
+		ImGui::Separator();
+
+		ImGui::InputInt2("Resolution", &m_showResolutionX);	
 		if (ImGui::Button("Apply resolution"))
 		{
 			resolutionX = m_showResolutionX;

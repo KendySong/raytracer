@@ -3,20 +3,20 @@
 
 #include <SDL/SDL.h>
 
-#include "../Timer.hpp"
-
 #include "Ray.hpp"
+#include "Camera.hpp"
 #include "Sphere.hpp"
+#include "../Timer.hpp"
 #include "../Math/Vec3.hpp"
 
 class Graphics
 {
 public :
-	Graphics(SDL_Window* window, SDL_Renderer* graphics);
+	Graphics(SDL_Window* window, SDL_Renderer* graphics, Camera* camera);
 	void clear();
 	void draw(std::uint32_t* backBuffer, const Sphere& sphere);
 
-	void drawGui(const Sphere& sphere);
+	void drawGui();
 	void render();
 
 	static std::uint32_t getColor(std::uint8_t r, std::uint8_t g, std::uint8_t b);
@@ -43,7 +43,7 @@ private :
 	float m_timeToRender;
 	bool m_renderOnce;
 
+	Camera* p_camera;
 	std::vector<Sphere> m_spheres;
-	Vec3 m_cameraPosition;
 	Vec3 m_lightDir;
 };

@@ -7,6 +7,7 @@
 #include "Math/Vec3.hpp"
 #include "Graphics/Sphere.hpp"
 #include "Graphics/Graphics.hpp"
+#include "Graphics/Camera.hpp"
 
 class Application
 {
@@ -27,6 +28,7 @@ private :
 
 	Graphics* m_graphics;
 	std::vector<Sphere> m_spheres;
+	Camera m_camera;
 
 	Timer m_deltaTimeChrono;	
 	Timer m_framerateChrono;
