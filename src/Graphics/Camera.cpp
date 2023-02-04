@@ -1,9 +1,13 @@
+#define _USE_MATH_DEFINES
+#include <math.h>
+
 #include <iostream>
 #include <windows.h>
 
 #include <SDL/SDL.h>
 
 #include "Camera.hpp"
+#include "../Application.hpp"
 #include "../Math/Math.hpp"
 #include "../Settings.hpp"
 
@@ -16,6 +20,7 @@ Camera::Camera(Vec3 position, float speed, float sensitivity)
 
 	m_rotationLimit = Math::toRadian(90);
 	m_firstMovement = true;
+	rotation = Vec3(0, M_PI / 2, 0);
 	this->position = position;
 }
 
@@ -28,7 +33,7 @@ void Camera::processMovement(float deltatime) noexcept
 
 	if (GetKeyState('A') & 0x8000)
 	{
-		position -= Math::cross(m_front, m_up) * deltatime * speed;
+		position += Math::cross(m_front, m_up) * deltatime * speed;
 	}
 
 	if (GetKeyState('S') & 0x8000)
@@ -38,30 +43,58 @@ void Camera::processMovement(float deltatime) noexcept
 
 	if (GetKeyState('D') & 0x8000)
 	{
-		position += Math::cross(m_front, m_up) * deltatime * speed;
+		position -= Math::cross(m_front, m_up) * deltatime * speed;
 	}
 
-	if (GetAsyncKeyState(VK_SPACE) & 0x8000)
+	if (GetKeyState(VK_SPACE) & 0x8000)
 	{
 		position.y += deltatime * speed;
 	}
 
-	if (GetAsyncKeyState(VK_SHIFT) & 0x8000)
+	if (GetKeyState(VK_SHIFT) & 0x8000)
 	{
 		position.y -= deltatime * speed;
+	}
+
+	if (GetKeyState(VK_RBUTTON) & 0x8000)
+	{	
+		this->processRotation();
+		SDL_SetRelativeMouseMode(SDL_TRUE);
+	}
+	else
+	{
+		SDL_SetRelativeMouseMode(SDL_FALSE);
 	}
 }
 
 void Camera::processRotation() noexcept
 {
-	if (m_rotation.x > m_rotationLimit)
+	/*
+	if (GetKeyState(VK_RBUTTON) & 0x8000)
 	{
-		m_rotation.x = m_rotationLimit;
+		rotation.y += m_sensitivity * deltatime;
 	}
 
-	if (m_rotation.x < -m_rotationLimit)
+	if (GetKeyState(VK_LBUTTON) & 0x8000)
 	{
-		m_rotation.x = -m_rotationLimit;
+		rotation.y -= m_sensitivity * deltatime;
+	}
+
+	m_front.x = sin(rotation.y) * cos(rotation.x);
+	m_front.y = sin(-rotation.x);
+	m_front.z = cos(rotation.y) * cos(rotation.x);
+
+	m_front = Math::normalize(m_front);
+	*/	
+
+	if (rotation.x > m_rotationLimit)
+	{
+		rotation.x = m_rotationLimit;
+	}
+
+	if (rotation.x < -m_rotationLimit)
+	{
+		rotation.x = -m_rotationLimit;
 	}
 
 	if (m_firstMovement)
@@ -76,19 +109,14 @@ void Camera::processRotation() noexcept
 
 	Vec2 mousePos(x, y);
 	Vec2 offset = mousePos - m_lastMousePos;
-	m_rotation.y -= offset.x * m_sensitivity;
-	m_rotation.x += offset.y * m_sensitivity;
+	rotation.y -= offset.x * m_sensitivity;
+	rotation.x += offset.y * m_sensitivity;
 
-	m_front.x = sin(m_rotation.y) * cos(m_rotation.x);
-	m_front.y = sin(-m_rotation.x);
-	m_front.z = cos(m_rotation.y) * cos(m_rotation.x);
+	m_front.x = sin(rotation.y) * cos(rotation.x);
+	m_front.y = sin(-rotation.x);
+	m_front.z = cos(rotation.y) * cos(rotation.x);
 
 	m_front = Math::normalize(m_front);
-}
-
-Vec3& Camera::getRotation() noexcept
-{
-	return m_rotation;
 }
 
 Vec3& Camera::getDirection() noexcept

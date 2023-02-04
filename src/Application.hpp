@@ -16,6 +16,7 @@ private :
 
 public :
 	static Application* instance();
+	SDL_Window* getWindow() noexcept;
 	int run();
 
 private :

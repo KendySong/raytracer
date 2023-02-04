@@ -45,13 +45,19 @@ void Graphics::draw(std::uint32_t* backBuffer, const Sphere& sphere)
 	{
 		for (int x = 0; x < resolutionX; x++)
 		{
+			//Normalize coordinates
 			Vec2 coord(x / fresolutionX, y / fresolutionY);
 			coord = coord * 2 - 1;
 			coord.x *= m_aspectRatio;
+		
+			//Create ray and rotate it for simulate the camera
+			Ray ray(Vec3(p_camera->position.x, p_camera->position.y, p_camera->position.z), Math::normalize(Vec3(coord.x, coord.y, -1)));
+			ray.direction = Math::rotateY(ray.direction, -p_camera->rotation.y);
+			ray.direction = Math::rotateX(ray.direction, -p_camera->rotation.x);
 
 			//ax^2 + bx + c
+			//Resolve equation for detect if the ray have an intersection with the sphere
 			float a, b, c, discriminant;
-			Ray ray(Vec3(p_camera->position.x, p_camera->position.y, p_camera->position.z), Math::normalize(Vec3(coord.x, coord.y, -1)));
 			a = Math::dot(ray.direction, ray.direction);
 			b = 2 * Math::dot(ray.origin, ray.direction);
 			c = Math::dot(ray.origin, ray.origin) - pow(sphere.radius, 2);
@@ -112,6 +118,7 @@ void Graphics::drawGui()
 
 		ImGui::TextUnformatted("Camera");	
 		ImGui::InputFloat3("Position", &p_camera->position.x);
+		ImGui::InputFloat3("Rotation", &p_camera->rotation.x);
 		ImGui::SliderFloat("Speed", &p_camera->speed, 1, 50);
 
 		ImGui::Separator();
@@ -131,6 +138,13 @@ void Graphics::drawGui()
 			m_aspectRatio = (float)resolutionX / (float)resolutionY;
 			this->resetFrameBuffer();
 		}
+
+		ImGui::Separator();
+
+		ImGui::TextUnformatted("Help");
+		ImGui::TextUnformatted("Control the camera : right click");
+		ImGui::TextUnformatted("Move : wasd");
+
 	ImGui::End();
 }
 
