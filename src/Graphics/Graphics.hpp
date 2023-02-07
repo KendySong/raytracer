@@ -14,12 +14,13 @@ class Graphics
 public :
 	Graphics(SDL_Window* window, SDL_Renderer* graphics, Camera* camera);
 	void clear();
-	void draw(std::uint32_t* backBuffer, const Sphere& sphere);
+	void draw();
 
 	void drawGui();
 	void render();
 
 	static std::uint32_t getColor(std::uint8_t r, std::uint8_t g, std::uint8_t b);
+	static SDL_Color getColor(std::uint32_t colorARGB);
 
 	SDL_Renderer* getRenderer() noexcept;
 	void setSpheres(std::vector<Sphere>& spheres);
@@ -40,10 +41,13 @@ private :
 	Timer m_frameChrono;
 	int m_showResolutionX;
 	int m_showResolutionY;
+	Vec2 m_resolution;
 	float m_timeToRender;
 	bool m_renderOnce;
 
-	Camera* p_camera;
 	std::vector<Sphere> m_spheres;
-	Vec3 m_lightDir;
+	Camera* p_camera;
+	Vec3 m_lightPos;
+	Sphere* p_closestSphere = nullptr;
+	float m_closestDist = FLT_MAX;
 };

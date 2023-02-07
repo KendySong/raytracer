@@ -1,8 +1,8 @@
 #define _USE_MATH_DEFINES
 #include <math.h>
 
-#include <iostream>
 #include <windows.h>
+#include <ImGui/imgui.h>
 
 #include <SDL/SDL.h>
 
@@ -33,7 +33,7 @@ void Camera::processMovement(float deltatime) noexcept
 
 	if (GetKeyState('A') & 0x8000)
 	{
-		position += Math::cross(m_front, m_up) * deltatime * speed;
+		position += Math::normalize(Math::cross(m_front, m_up)) * deltatime * speed;
 	}
 
 	if (GetKeyState('S') & 0x8000)
@@ -43,17 +43,17 @@ void Camera::processMovement(float deltatime) noexcept
 
 	if (GetKeyState('D') & 0x8000)
 	{
-		position -= Math::cross(m_front, m_up) * deltatime * speed;
+		position -= Math::normalize(Math::cross(m_front, m_up)) * deltatime * speed;
 	}
 
 	if (GetKeyState(VK_SPACE) & 0x8000)
 	{
-		position.y += deltatime * speed;
+		position.y -= deltatime * speed;
 	}
 
 	if (GetKeyState(VK_SHIFT) & 0x8000)
 	{
-		position.y -= deltatime * speed;
+		position.y += deltatime * speed;
 	}
 
 	if (GetKeyState(VK_RBUTTON) & 0x8000)
@@ -69,24 +69,6 @@ void Camera::processMovement(float deltatime) noexcept
 
 void Camera::processRotation() noexcept
 {
-	/*
-	if (GetKeyState(VK_RBUTTON) & 0x8000)
-	{
-		rotation.y += m_sensitivity * deltatime;
-	}
-
-	if (GetKeyState(VK_LBUTTON) & 0x8000)
-	{
-		rotation.y -= m_sensitivity * deltatime;
-	}
-
-	m_front.x = sin(rotation.y) * cos(rotation.x);
-	m_front.y = sin(-rotation.x);
-	m_front.z = cos(rotation.y) * cos(rotation.x);
-
-	m_front = Math::normalize(m_front);
-	*/	
-
 	if (rotation.x > m_rotationLimit)
 	{
 		rotation.x = m_rotationLimit;
@@ -112,9 +94,9 @@ void Camera::processRotation() noexcept
 	rotation.y -= offset.x * m_sensitivity;
 	rotation.x += offset.y * m_sensitivity;
 
-	m_front.x = sin(rotation.y) * cos(rotation.x);
-	m_front.y = sin(-rotation.x);
-	m_front.z = cos(rotation.y) * cos(rotation.x);
+	m_front.x = cos(rotation.y) * cos(rotation.x);
+	m_front.y = sin(rotation.x);
+	m_front.z = sin(rotation.y) * cos(rotation.x);
 
 	m_front = Math::normalize(m_front);
 }

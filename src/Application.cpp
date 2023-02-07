@@ -27,9 +27,11 @@ Application::Application()
 	ImGui_ImplSDLRenderer_Init(m_graphics->getRenderer());
 
 	//Init world
-	m_spheres.push_back(Sphere(Vec3(0, 0, 0), 4));
+	m_spheres.emplace_back(Vec3(5, 0, -30), 4, 0xFF00FF00);
+	m_spheres.emplace_back(Vec3(-5, 0, -50), 4, 0xFFFF0000);
+	
 	m_graphics->setSpheres(m_spheres);
-	m_camera = Camera(Vec3(0, 0, -10), 10, 0.01f);
+	m_camera = Camera(Vec3(0, 0, 10), 10, 0.0005f);
 }
 
 Application* Application::instance()
@@ -79,9 +81,7 @@ int Application::run()
 		//Render frame
 		m_graphics->clear();
 		m_graphics->drawGui();
-		m_graphics->render();		
-
-		
+		m_graphics->render();	
 	}
 
 	delete p_app;
