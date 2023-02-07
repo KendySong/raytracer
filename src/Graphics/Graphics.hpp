@@ -12,7 +12,7 @@
 class Graphics
 {
 public :
-	Graphics(SDL_Window* window, SDL_Renderer* graphics, Camera* camera);
+	Graphics(SDL_Window* window, SDL_Renderer* graphics);
 	void clear();
 	void draw();
 
@@ -46,8 +46,8 @@ private :
 	bool m_renderOnce;
 
 	std::vector<Sphere> m_spheres;
-	Camera* p_camera;
 	Vec3 m_lightPos;
+	Vec3 m_position;
 	Sphere* p_closestSphere = nullptr;
 	float m_closestDist = FLT_MAX;
 };

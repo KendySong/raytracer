@@ -11,7 +11,7 @@
 #include "../Math/Math.hpp"
 #include "../Settings.hpp"
 
-Graphics::Graphics(SDL_Window* window, SDL_Renderer* graphics, Camera* camera) : p_window(window), p_graphics(graphics), p_camera(camera)
+Graphics::Graphics(SDL_Window* window, SDL_Renderer* graphics) : p_window(window), p_graphics(graphics)
 {
 	m_showResolutionX = resolutionX;
 	m_showResolutionY = resolutionY;
@@ -24,6 +24,7 @@ Graphics::Graphics(SDL_Window* window, SDL_Renderer* graphics, Camera* camera) :
 
 	m_lightPos = Vec3(-1, -1, 1);
 	m_renderOnce = false;
+	m_position = Vec3(0, 0, -1);
 }
 
 void Graphics::clear()
@@ -43,53 +44,6 @@ void Graphics::draw()
 	{
 		for (int x = 0; x < resolutionX; x++)
 		{
-			/*
-			//Normalize coordinates
-			Vec2 coord(x / m_resolution.x, y / m_resolution.y);
-			coord = coord * 2 - 1;
-			coord.x *= m_aspectRatio;
-
-			//Create ray and rotate it for simulate the camera
-			Ray ray(p_camera->position, Math::normalize(Vec3(coord.x, coord.y, p_camera->position.z)));
-			ray.direction = Math::rotateX(ray.direction, p_camera->rotation.x);
-			ray.direction = Math::rotateY(ray.direction, p_camera->rotation.y);
-		
-			Vec3 origin = ray.origin - m_spheres[0].position;
-
-			//ax^2 + bx + c
-			//Resolve equation for detect if the ray have an intersection with the sphere
-			float a, b, c, discriminant;
-			a = Math::dot(ray.direction, ray.direction);
-			b = 2 * Math::dot(origin, ray.direction);
-			c = Math::dot(origin, origin) - pow(m_spheres[0].radius, 2);
-			discriminant = pow(b, 2) - 4 * a * c;
-
-			if (discriminant > 0)
-			{
-				float t = (-b - sqrt(discriminant)) / (2 * a);
-
-				if (t < 0)
-				{
-					p_backBuffer[y * resolutionX + x] = this->getColor(0, 170, 255);
-					continue;
-				}
-
-				//Compute scalar for getting intersection point
-				Vec3 hit = ray.at(t);
-
-				//Compute normal vector and light intensity
-				Vec3 normal = hit - m_spheres[0].position;
-				float intensity = Math::dot(Math::normalize(normal), Math::normalize(m_lightPos - m_spheres[0].position));
-				intensity = intensity < 0 ? 0 : intensity > 1 ? 1 : intensity;
-				p_backBuffer[y * resolutionX + x] = this->getColor(0, intensity * 255, 0);
-			}
-			else
-			{
-				p_backBuffer[y * resolutionX + x] = this->getColor(0, 170, 255);
-			}	
-			*/
-
-			
 			p_closestSphere = nullptr;
 			m_closestDist = FLT_MAX;
 
@@ -99,9 +53,7 @@ void Graphics::draw()
 			coord.x *= m_aspectRatio;
 
 			//Create ray and rotate it for simulate the camera
-			Ray ray(p_camera->position, Math::normalize(Vec3(coord.x, coord.y, p_camera->position.z)));
-			ray.direction = Math::rotateX(ray.direction, p_camera->rotation.x);
-			ray.direction = Math::rotateY(ray.direction, p_camera->rotation.y);
+			Ray ray(m_position, Math::normalize(Vec3(coord.x, coord.y, -1)));
 
 			for (Sphere& sphere : m_spheres)
 			{
@@ -175,11 +127,7 @@ void Graphics::drawGui()
 		ImGui::Separator();
 
 		ImGui::TextUnformatted("Camera");	
-		ImGui::DragFloat3("Position", &p_camera->position.x);
-		ImGui::DragFloat3("Rotation", &p_camera->rotation.x);
-		ImGui::DragFloat3("Direction", &p_camera->getDirection().x);
-		ImGui::SliderFloat("Speed", &p_camera->speed, 1, 50);
-
+		ImGui::DragFloat3("Position", &m_position.x);
 		ImGui::Separator();
 
 		ImGui::TextUnformatted("Light");
@@ -213,7 +161,7 @@ void Graphics::drawGui()
 	{
 		ImGui::PushID(i);
 		ImGui::Text("Sphere[%i]", i);
-		ImGui::DragFloat3("Position", &m_spheres[i].position.x);
+		ImGui::DragFloat3("Position", &m_spheres[i].position.x, 0.01f);
 		ImGui::SliderFloat("Radius", &m_spheres[i].radius, 0, 10);
 		ImGui::Separator();
 		ImGui::PopID();

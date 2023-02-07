@@ -29,9 +29,7 @@ private :
 
 	Graphics* m_graphics;
 	std::vector<Sphere> m_spheres;
-	Camera m_camera;
 
-	Timer m_deltaTimeChrono;	
 	Timer m_framerateChrono;
 	int m_displayFPS;
 	int m_fps;
