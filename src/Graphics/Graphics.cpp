@@ -155,8 +155,19 @@ std::uint32_t Graphics::perPixel(Vec2& coord)
 
 	if (rayInfo.sphere != nullptr)
 	{
-		SDL_Color sphereColor = this->getColor(rayInfo.sphere->color);
-		return this->getColor(sphereColor.r * intensity, sphereColor.g * intensity, sphereColor.b * intensity);
+		Ray bounce(rayInfo.position, rayInfo.normal);
+		RayInfo bounceInfo = this->traceRay(bounce);
+		if (bounceInfo.sphere != nullptr)
+		{
+			SDL_Color bounceSphereColor = this->getColor(bounceInfo.sphere->color);
+			return this->getColor(bounceSphereColor.r * intensity, bounceSphereColor.g * intensity, bounceSphereColor.b * intensity);
+		}
+		else
+		{
+			SDL_Color sphereColor = this->getColor(rayInfo.sphere->color);
+			return this->getColor(sphereColor.r * intensity, sphereColor.g * intensity, sphereColor.b * intensity);
+		}
+		
 	}
 
 	return this->getColor(0, 170, 255);;
