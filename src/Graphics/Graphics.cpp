@@ -24,7 +24,7 @@ Graphics::Graphics(SDL_Window* window, SDL_Renderer* graphics) : p_window(window
 
 	m_lightPos = Vec3(-1, -1, 1);
 	m_renderOnce = false;
-	m_position = Vec3(0, 0, -1);
+	m_position = Vec3(0, 0, 0);
 }
 
 void Graphics::clear()
@@ -37,8 +37,6 @@ void Graphics::clear()
 	ImGui_ImplSDL2_NewFrame(p_window);
 	ImGui::NewFrame();
 }
-
-
 
 void Graphics::drawGui()
 {
