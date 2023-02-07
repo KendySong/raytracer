@@ -9,7 +9,7 @@
 
 #include "Graphics.hpp"
 #include "../Math/Math.hpp"
-#include "../Settings.hpp"
+#include "../Core/Settings.hpp"
 
 Graphics::Graphics(SDL_Window* window, SDL_Renderer* graphics) : p_window(window), p_graphics(graphics)
 {
@@ -38,73 +38,7 @@ void Graphics::clear()
 	ImGui::NewFrame();
 }
 
-void Graphics::draw()
-{
-	for (int y = 0; y < resolutionY; y++)
-	{
-		for (int x = 0; x < resolutionX; x++)
-		{
-			p_closestSphere = nullptr;
-			m_closestDist = FLT_MAX;
 
-			//Normalize coordinates
-			Vec2 coord(x / m_resolution.x, y / m_resolution.y);
-			coord = coord * 2 - 1;
-			coord.x *= m_aspectRatio;
-
-			//Create ray and rotate it for simulate the camera
-			Ray ray(m_position, Math::normalize(Vec3(coord.x, coord.y, -1)));
-
-			for (Sphere& sphere : m_spheres)
-			{
-				Vec3 origin = ray.origin - sphere.position;
-
-				//ax^2 + bx + c
-				//Resolve equation for detect if the ray have an intersection with the sphere
-				float a, b, c, discriminant;
-				a = Math::dot(ray.direction, ray.direction);
-				b = 2 * Math::dot(origin, ray.direction);
-				c = Math::dot(origin, origin) - pow(sphere.radius, 2);
-				discriminant = pow(b, 2) - 4 * a * c;
-
-				if (discriminant > 0)
-				{
-					float t = (-b - sqrt(discriminant)) / (2 * a);
-
-					if (t < 0)
-					{
-						continue;
-					}
-
-					if (t < m_closestDist)
-					{
-						m_closestDist = t;
-						p_closestSphere = &sphere;
-					}
-				}
-				else
-				{
-					continue;
-				}
-			}
-
-			if (p_closestSphere == nullptr)
-			{
-				p_backBuffer[y * resolutionX + x] = this->getColor(0, 170, 255);
-				continue;
-			}
-
-			//Compute scalar for getting intersection point
-			Vec3 hit = ray.at(m_closestDist);
-
-			//Compute normal vector and light intensity
-			Vec3 normal = hit - p_closestSphere->position;
-			float intensity = Math::dot(Math::normalize(normal), Math::normalize(m_lightPos - p_closestSphere->position));
-			intensity = intensity < 0 ? 0 : intensity > 1 ? 1 : intensity;
-			p_backBuffer[y * resolutionX + x] = this->getColor(0, intensity * 255, 0);			
-		}
-	}
-}
 
 void Graphics::drawGui()
 {
@@ -126,13 +60,13 @@ void Graphics::drawGui()
 		}
 		ImGui::Separator();
 
-		ImGui::TextUnformatted("Camera");	
-		ImGui::DragFloat3("Position", &m_position.x);
+		ImGui::TextUnformatted("Origin");	
+		ImGui::DragFloat3("Position", &m_position.x, 0.1f);
 		ImGui::Separator();
 
 		ImGui::TextUnformatted("Light");
 		ImGui::PushID(0);
-		ImGui::DragFloat3("Position", &m_lightPos.x);	
+		ImGui::DragFloat3("Position", &m_lightPos.x, 0.1f);	
 		ImGui::PopID();
 
 		ImGui::Separator();
@@ -148,12 +82,6 @@ void Graphics::drawGui()
 			this->resetFrameBuffer();
 		}
 
-		ImGui::Separator();
-
-		ImGui::TextUnformatted("Help");
-		ImGui::TextUnformatted("Control the camera : right click");
-		ImGui::TextUnformatted("Move : wasd");
-
 	ImGui::End();
 
 	ImGui::Begin("Scene");
@@ -167,25 +95,6 @@ void Graphics::drawGui()
 		ImGui::PopID();
 	}
 	ImGui::End();
-}
-
-void Graphics::render()
-{
-	SDL_UpdateTexture(p_frontTex, NULL, p_frontBuffer, resolutionX * sizeof std::uint32_t);
-	SDL_RenderCopy(p_graphics, p_frontTex, NULL, NULL);
-
-	ImGui::Render();
-	ImGui_ImplSDLRenderer_RenderDrawData(ImGui::GetDrawData());
-	SDL_RenderPresent(p_graphics);
-}
-
-std::uint32_t Graphics::getColor(std::uint8_t r, std::uint8_t g, std::uint8_t b)
-{
-	std::uint32_t red = (0x000000FF & r) << 16;
-	std::uint32_t green = (0x000000FF & g) << 8;
-	std::uint32_t blue = (0x000000FF & b);
-	std::uint32_t result = 0xFF000000 | red | green | blue;
-	return result;
 }
 
 SDL_Color Graphics::getColor(std::uint32_t colorARGB)
@@ -203,9 +112,104 @@ SDL_Renderer* Graphics::getRenderer() noexcept
 	return p_graphics;
 }
 
-void Graphics::setSpheres(std::vector<Sphere>& spheres)
+void Graphics::render()
+{
+	SDL_UpdateTexture(p_frontTex, NULL, p_frontBuffer, resolutionX * sizeof std::uint32_t);
+	SDL_RenderCopy(p_graphics, p_frontTex, NULL, NULL);
+
+	ImGui::Render();
+	ImGui_ImplSDLRenderer_RenderDrawData(ImGui::GetDrawData());
+	SDL_RenderPresent(p_graphics);
+}
+
+std::uint32_t Graphics::getColor(std::uint8_t r, std::uint8_t g, std::uint8_t b)
+{
+	return 0xFF000000 | ((0x000000FF & r) << 16) | ((0x000000FF & g) << 8) | (0x000000FF & b);
+}
+
+void Graphics::setSpheres(std::vector<Sphere>& spheres) noexcept
 {
 	m_spheres = spheres;
+}
+
+void Graphics::draw()
+{
+	for (int y = 0; y < resolutionY; y++)
+	{
+		for (int x = 0; x < resolutionX; x++)
+		{
+			p_backBuffer[y * resolutionX + x] = this->perPixel(Vec2(x, y) / m_resolution);
+		}
+	}
+}
+
+std::uint32_t Graphics::perPixel(Vec2& coord)
+{
+	//Normalize coordinates
+	coord = coord * 2 - 1;
+	coord.x *= m_aspectRatio;
+
+	Ray ray(m_position, Math::normalize(Vec3(coord.x, coord.y, -1)));
+	RayInfo rayInfo = this->traceRay(ray);
+
+	float intensity = Math::dot(Math::normalize(rayInfo.normal), Math::normalize(m_lightPos - rayInfo.position));
+	intensity = intensity < 0 ? 0 : intensity > 1 ? 1 : intensity;
+
+	if (rayInfo.sphere != nullptr)
+	{
+		SDL_Color sphereColor = this->getColor(rayInfo.sphere->color);
+		return this->getColor(sphereColor.r * intensity, sphereColor.g * intensity, sphereColor.b * intensity);
+	}
+
+	return this->getColor(0, 170, 255);;
+}
+
+RayInfo Graphics::traceRay(Ray& ray)
+{
+	Sphere* closestSphere = nullptr;
+	float closestDist = FLT_MAX;
+
+	for (Sphere& sphere : m_spheres)
+	{
+		Vec3 origin = ray.origin - sphere.position;
+
+		//ax^2 + bx + c
+		//Resolve equation for detect if the ray have an intersection with the sphere
+		float a, b, c, discriminant;
+		a = Math::dot(ray.direction, ray.direction);
+		b = 2 * Math::dot(origin, ray.direction);
+		c = Math::dot(origin, origin) - pow(sphere.radius, 2);
+		discriminant = pow(b, 2) - 4 * a * c;
+
+		if (discriminant > 0)
+		{
+			float t = (-b - sqrt(discriminant)) / (2 * a);
+
+			if (t < 0)
+			{
+				continue;
+			}
+
+			if (t < closestDist)
+			{
+				closestDist = t;
+				closestSphere = &sphere;
+			}
+		}
+	}
+
+	if (closestSphere == nullptr)
+	{
+		return RayInfo();
+	}
+
+	return this->closestHit(ray, closestDist, closestSphere);
+}
+RayInfo Graphics::closestHit(Ray& ray, float hitDistance, Sphere* hitSphere)
+{
+	Vec3 hit = ray.at(hitDistance);
+	Vec3 normal = hit - hitSphere->position;
+	return RayInfo(hitSphere, hitDistance, hit, normal);
 }
 
 void Graphics::resetFrameBuffer()

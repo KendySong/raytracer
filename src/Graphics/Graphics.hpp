@@ -4,28 +4,32 @@
 #include <SDL/SDL.h>
 
 #include "Ray.hpp"
-#include "Camera.hpp"
 #include "Sphere.hpp"
+#include "RayInfo.hpp"
 #include "../Timer.hpp"
 #include "../Math/Vec3.hpp"
+#include "../Math/Vec2.hpp"
 
 class Graphics
 {
 public :
 	Graphics(SDL_Window* window, SDL_Renderer* graphics);
 	void clear();
-	void draw();
-
 	void drawGui();
 	void render();
+
+	SDL_Renderer* getRenderer() noexcept;
+	void setSpheres(std::vector<Sphere>& spheres) noexcept;
 
 	static std::uint32_t getColor(std::uint8_t r, std::uint8_t g, std::uint8_t b);
 	static SDL_Color getColor(std::uint32_t colorARGB);
 
-	SDL_Renderer* getRenderer() noexcept;
-	void setSpheres(std::vector<Sphere>& spheres);
-
 private :
+	void draw();
+	std::uint32_t perPixel(Vec2& coord);
+	RayInfo traceRay(Ray& ray);
+	RayInfo closestHit(Ray& ray, float hitDistance, Sphere* hitSphere);
+
 	void resetFrameBuffer();
 	void drawSwap();
 
@@ -48,6 +52,4 @@ private :
 	std::vector<Sphere> m_spheres;
 	Vec3 m_lightPos;
 	Vec3 m_position;
-	Sphere* p_closestSphere = nullptr;
-	float m_closestDist = FLT_MAX;
 };

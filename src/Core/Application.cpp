@@ -5,7 +5,7 @@
 #include <ImGui/imgui_impl_sdlrenderer.h>
 
 #include "Application.hpp"
-#include "Graphics/Sphere.hpp"
+#include "../Graphics/Sphere.hpp"
 #include "Settings.hpp"
 
 Application* Application::p_app = nullptr;

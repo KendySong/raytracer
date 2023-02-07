@@ -4,7 +4,6 @@
 
 struct Sphere
 {
-public :
     Sphere(Vec3 position, float radius, std::uint32_t color);
     Sphere(Vec3 position, float radius);
 
