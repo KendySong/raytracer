@@ -27,8 +27,8 @@ public :
 private :
 	void draw();
 	std::uint32_t perPixel(Vec2& coord);
-	RayInfo traceRay(Ray& ray);
-	RayInfo closestHit(Ray& ray, float hitDistance, Sphere* hitSphere);
+	RayInfo traceRay(const Ray& ray);
+	RayInfo closestHit(const Ray& ray, float hitDistance, Sphere* hitSphere);
 
 	void resetFrameBuffer();
 	void drawSwap();
@@ -52,4 +52,6 @@ private :
 	std::vector<Sphere> m_spheres;
 	Vec3 m_lightPos;
 	Vec3 m_position;
+
+	float m_maximumShading;
 };

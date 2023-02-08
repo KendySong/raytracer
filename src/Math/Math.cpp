@@ -92,8 +92,7 @@ float Math::toRadian(float angle)
     return angle * (M_PI / 180);
 }
 
-Vec3 Math::reflect(const RayInfo& rayInfo)
-{
-    Vec3 normal = Math::normalize(rayInfo.position - rayInfo.sphere->position);
-    return rayInfo.position - 2 * Math::dot(rayInfo.position, normal) * normal;
+Vec3 Math::reflect(const Vec3& direction, const Vec3& normal)
+{   
+    return direction - 2 * Math::dot(direction, normal) * normal;
 }

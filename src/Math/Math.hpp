@@ -24,5 +24,5 @@ public :
 
     //Misc
     static float toRadian(float angle);
-    static Vec3 reflect(const RayInfo& rayInfo);
+    static Vec3 reflect(const Vec3& direction, const Vec3& normal);
 };
