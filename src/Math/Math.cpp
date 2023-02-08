@@ -34,14 +34,14 @@ float Math::dot(const Vec3& vec1, const Vec3& vec2) noexcept
     return (vec1.x * vec2.x) + (vec1.y * vec2.y) + (vec1.z * vec2.z);
 }
 
-float Math::magnitude(const Vec3& vec) noexcept
+float Math::length(const Vec3& vec) noexcept
 {
     return sqrt(vec.x * vec.x + vec.z * vec.z + vec.y * vec.y);
 }
 
 Vec3 Math::normalize(const Vec3& vec) noexcept
 {
-    float length = Math::magnitude(vec);
+    float length = Math::length(vec);
     return vec / length;
 }
 
@@ -90,4 +90,10 @@ Vec3 Math::rotateZ(const Vec3& vec, float angle)
 float Math::toRadian(float angle)
 {
     return angle * (M_PI / 180);
+}
+
+Vec3 Math::reflect(const RayInfo& rayInfo)
+{
+    Vec3 normal = Math::normalize(rayInfo.position - rayInfo.sphere->position);
+    return rayInfo.position - 2 * Math::dot(rayInfo.position, normal) * normal;
 }

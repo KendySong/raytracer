@@ -56,17 +56,8 @@ void Graphics::drawGui()
 				this->drawSwap();
 			}
 		}
-		ImGui::Separator();
 
-		ImGui::TextUnformatted("Origin");	
-		ImGui::DragFloat3("Position", &m_position.x, 0.1f);
-		ImGui::Separator();
-
-		ImGui::TextUnformatted("Light");
-		ImGui::PushID(0);
-		ImGui::DragFloat3("Position", &m_lightPos.x, 0.1f);	
-		ImGui::PopID();
-
+		ImGui::InputInt("Bounce limit", &bounceLimit, 1);
 		ImGui::Separator();
 
 		ImGui::InputInt2("Resolution", &m_showResolutionX);	
@@ -83,6 +74,17 @@ void Graphics::drawGui()
 	ImGui::End();
 
 	ImGui::Begin("Scene");
+	
+	ImGui::TextUnformatted("Origin");
+	ImGui::SameLine();
+	ImGui::DragFloat3("Position", &m_position.x, 0.1f);
+	ImGui::TextUnformatted("Light ");
+	ImGui::SameLine();
+	ImGui::PushID(m_spheres.size());
+	ImGui::DragFloat3("Position", &m_lightPos.x, 0.1f);
+	ImGui::PopID();
+	ImGui::Separator();
+
 	for (size_t i = 0; i < m_spheres.size(); i++)
 	{
 		ImGui::PushID(i);
@@ -149,28 +151,24 @@ std::uint32_t Graphics::perPixel(Vec2& coord)
 
 	Ray ray(m_position, Math::normalize(Vec3(coord.x, coord.y, -1)));
 	RayInfo rayInfo = this->traceRay(ray);
+	if (rayInfo.sphere == nullptr)
+	{
+		return this->getColor(0, 170, 255);
+	}
 
 	float intensity = Math::dot(Math::normalize(rayInfo.normal), Math::normalize(m_lightPos - rayInfo.position));
 	intensity = intensity < 0 ? 0 : intensity > 1 ? 1 : intensity;
 
-	if (rayInfo.sphere != nullptr)
+	Ray bounce(rayInfo.position, Math::reflect(rayInfo));
+	RayInfo bounceInfo = this->traceRay(bounce);
+	if (bounceInfo.sphere != nullptr)
 	{
-		Ray bounce(rayInfo.position, rayInfo.normal);
-		RayInfo bounceInfo = this->traceRay(bounce);
-		if (bounceInfo.sphere != nullptr)
-		{
-			SDL_Color bounceSphereColor = this->getColor(bounceInfo.sphere->color);
-			return this->getColor(bounceSphereColor.r * intensity, bounceSphereColor.g * intensity, bounceSphereColor.b * intensity);
-		}
-		else
-		{
-			SDL_Color sphereColor = this->getColor(rayInfo.sphere->color);
-			return this->getColor(sphereColor.r * intensity, sphereColor.g * intensity, sphereColor.b * intensity);
-		}
-		
+		SDL_Color bounceSphereColor = this->getColor(bounceInfo.sphere->color);
+		return this->getColor(bounceSphereColor.r * intensity, bounceSphereColor.g * intensity, bounceSphereColor.b * intensity);
 	}
-
-	return this->getColor(0, 170, 255);;
+	
+	SDL_Color sphereColor = this->getColor(rayInfo.sphere->color);
+	return this->getColor(sphereColor.r * intensity, sphereColor.g * intensity, sphereColor.b * intensity);	
 }
 
 RayInfo Graphics::traceRay(Ray& ray)
@@ -194,12 +192,7 @@ RayInfo Graphics::traceRay(Ray& ray)
 		{
 			float t = (-b - sqrt(discriminant)) / (2 * a);
 
-			if (t < 0)
-			{
-				continue;
-			}
-
-			if (t < closestDist)
+			if (t > 0 && t < closestDist)
 			{
 				closestDist = t;
 				closestSphere = &sphere;
