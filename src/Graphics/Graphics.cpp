@@ -159,11 +159,11 @@ std::uint32_t Graphics::perPixel(Vec2& coord)
 	}
 
 	//Compute light intensity
-	float lightIntensity = Math::dot(Math::normalize(rayInfo.normal), Math::normalize(m_lightPos - rayInfo.position));
+	float lightIntensity = Math::dot(rayInfo.normal, Math::normalize(m_lightPos - rayInfo.position));
 	lightIntensity = lightIntensity < m_maximumShading ? m_maximumShading : lightIntensity > 1 ? 1 : lightIntensity;
 
 	SDL_Color pixelColor = this->getColor(rayInfo.sphere->color);
-	ray = Ray(rayInfo.position, Math::reflect(ray.direction, Math::normalize(rayInfo.position - rayInfo.sphere->position)));
+	ray = Ray(rayInfo.position, Math::reflect(ray.direction, rayInfo.normal));
 
 	for (size_t i = 0; i < bounceLimit; i++)
 	{			
@@ -171,8 +171,8 @@ std::uint32_t Graphics::perPixel(Vec2& coord)
 		if (rayInfo.sphere != nullptr)
 		{
 			rayInfo = this->traceRay(ray);
-			ray = Ray(rayInfo.position, Math::reflect(ray.direction, Math::normalize(rayInfo.position - rayInfo.sphere->position)));
-			pixelColor = this->getColor(rayInfo.sphere->color);	
+			ray = Ray(rayInfo.position, Math::reflect(ray.direction, rayInfo.normal));
+			pixelColor = this->getColor(rayInfo.sphere->color);
 		}
 		else
 		{
@@ -222,7 +222,7 @@ RayInfo Graphics::traceRay(const Ray& ray)
 RayInfo Graphics::closestHit(const Ray& ray, float hitDistance, Sphere* hitSphere)
 {
 	Vec3 hit = ray.at(hitDistance);
-	Vec3 normal = hit - hitSphere->position;
+	Vec3 normal = Math::normalize(hit - hitSphere->position);
 	return RayInfo(hitSphere, hitDistance, hit, normal);
 }
 
