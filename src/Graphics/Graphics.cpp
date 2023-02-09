@@ -92,7 +92,7 @@ void Graphics::drawGui()
 		ImGui::PushID(i);
 		ImGui::Text("Sphere[%i]", i);
 		ImGui::DragFloat3("Position", &m_spheres[i].position.x, 0.01f);
-		ImGui::SliderFloat("Radius", &m_spheres[i].radius, 0, 10);
+		ImGui::SliderFloat("Radius", &m_spheres[i].radius, 0, 100);
 		ImGui::Separator();
 		ImGui::PopID();
 	}

@@ -27,8 +27,8 @@ Application::Application()
 	ImGui_ImplSDLRenderer_Init(m_graphics->getRenderer());
 
 	//Init world
-	m_spheres.emplace_back(Vec3(1, 0, -1.7), 1, 0xFF00FF00);
-	m_spheres.emplace_back(Vec3(-1, 0, -1.7), 1, 0xFFFF0000);
+	m_spheres.emplace_back(Vec3(0, 46.430, -20), 50, 0xFF00FF00);
+	m_spheres.emplace_back(Vec3(0, 0, -0.73), 0.25, 0xFFFF0000);
 	
 	m_graphics->setSpheres(m_spheres);
 }
