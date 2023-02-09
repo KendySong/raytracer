@@ -9,6 +9,7 @@
 #include "../Timer.hpp"
 #include "../Math/Vec3.hpp"
 #include "../Math/Vec2.hpp"
+#include "../Math/Random.hpp"
 
 class Graphics
 {
@@ -24,6 +25,7 @@ public :
 	static std::uint32_t getColor(std::uint8_t r, std::uint8_t g, std::uint8_t b);
 	static std::uint32_t getColor(const Vec3& colorRGB);
 	static SDL_Color getColor(std::uint32_t colorARGB);
+	static Vec3 setBetween(Vec3 vec, float min, float max);
 
 private :
 	void draw();
@@ -50,6 +52,7 @@ private :
 	float m_timeToRender;
 	bool m_renderOnce;
 
+	Random m_randomVec;
 	std::vector<Sphere> m_spheres;
 	Vec3 m_lightPos;
 	Vec3 m_position;
