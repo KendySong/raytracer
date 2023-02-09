@@ -1,5 +1,4 @@
 #include <cstdint>
-#include <iostream>
 
 #include <SDL/SDL_image.h>
 
@@ -22,6 +21,7 @@ Graphics::Graphics(SDL_Window* window, SDL_Renderer* graphics) : p_window(window
 	p_backBuffer = new std::uint32_t[0];
 	this->resetFrameBuffer();
 
+	m_random = Random(std::chrono::system_clock::now().time_since_epoch().count());
 	m_lightPos = Vec3(-1, -1, 1);
 	m_renderOnce = false;
 	m_position = Vec3(0, 0, 0);
@@ -87,6 +87,7 @@ void Graphics::drawGui()
 	ImGui::PopID();
 	ImGui::Separator();
 
+	
 	for (size_t i = 0; i < m_spheres.size(); i++)
 	{
 		ImGui::PushID(i);
@@ -96,15 +97,15 @@ void Graphics::drawGui()
 		{
 			ImGui::DragFloat3("Position", &m_spheres[i].position.x, 0.01f);
 			ImGui::SliderFloat("Radius", &m_spheres[i].radius, 0, 100);
+			ImGui::TreePop();
 		}
-		
+	
 		if (ImGui::TreeNode("Material"))
 		{
-			ImGui::DragFloat3("Color", &m_spheres[i].material.albedo.x);
+			ImGui::ColorEdit3("Color", &m_spheres[i].material.albedo.x);
 			ImGui::DragFloat("Roughness", &m_spheres[i].material.roughness);
 			ImGui::DragFloat("Metallic", &m_spheres[i].material.metallic);
-
-
+			ImGui::TreePop();
 		}
 
 		ImGui::Separator();
@@ -167,7 +168,34 @@ void Graphics::draw()
 }
 
 std::uint32_t Graphics::perPixel(Vec2& coord)
-{
+{	
+	coord = coord * 2 - 1;
+	coord.x *= m_aspectRatio;
+	Ray ray(m_position, Math::normalize(Vec3(coord.x, coord.y, -1)));
+	Vec3 pixelColor(0);
+	float colorFactor = 1;
+
+	for (size_t i = 0; i < bounceLimit; i++)
+	{
+		RayInfo rayInfo = this->traceRay(ray);
+		if (rayInfo.sphere == nullptr)
+		{
+			pixelColor += Vec3(0, 0, 0) * colorFactor;
+			break;
+		}
+
+		float lightIntensity = Math::dot(rayInfo.normal, Math::normalize(m_lightPos - rayInfo.position));
+		lightIntensity = lightIntensity < m_maximumShading ? m_maximumShading : lightIntensity > 1 ? 1 : lightIntensity;
+
+		pixelColor += rayInfo.sphere->material.albedo * lightIntensity * colorFactor;
+		colorFactor *= 0.7;
+
+		ray = Ray(rayInfo.position, Math::reflect(ray.direction, rayInfo.normal));
+	}
+	
+	return this->getColor(pixelColor);
+
+	/*
 	//Normalize coordinates
 	coord = coord * 2 - 1;
 	coord.x *= m_aspectRatio;
@@ -186,22 +214,21 @@ std::uint32_t Graphics::perPixel(Vec2& coord)
 	Vec3 pixelColor = rayInfo.sphere->material.albedo;
 	ray = Ray(rayInfo.position, Math::reflect(ray.direction, rayInfo.normal));
 
+	//Bounce the ray
 	for (size_t i = 0; i < bounceLimit; i++)
 	{			
 		rayInfo = this->traceRay(ray);
-		if (rayInfo.sphere != nullptr)
-		{
-			rayInfo = this->traceRay(ray);
-			ray = Ray(rayInfo.position, Math::reflect(ray.direction, rayInfo.normal));
-			Vec3 pixelColor = rayInfo.sphere->material.albedo;
-		}
-		else
+		if (rayInfo.sphere == nullptr)
 		{
 			break;
 		}
+
+		ray = Ray(rayInfo.position, Math::reflect(ray.direction, rayInfo.normal));
+		pixelColor += rayInfo.sphere->material.albedo * 0.2 - (i * 0.10);
 	}
 	
 	return this->getColor(pixelColor * lightIntensity);
+	*/
 }
 
 RayInfo Graphics::traceRay(const Ray& ray)

@@ -9,6 +9,7 @@
 #include "../Timer.hpp"
 #include "../Math/Vec3.hpp"
 #include "../Math/Vec2.hpp"
+#include "../Math/Random.hpp"
 
 class Graphics
 {
@@ -54,5 +55,6 @@ private :
 	Vec3 m_lightPos;
 	Vec3 m_position;
 
+	Random m_random;
 	float m_maximumShading;
 };
