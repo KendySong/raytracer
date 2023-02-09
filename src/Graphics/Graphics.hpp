@@ -22,6 +22,7 @@ public :
 	void setSpheres(std::vector<Sphere>& spheres) noexcept;
 
 	static std::uint32_t getColor(std::uint8_t r, std::uint8_t g, std::uint8_t b);
+	static std::uint32_t getColor(const Vec3& colorRGB);
 	static SDL_Color getColor(std::uint32_t colorARGB);
 
 private :

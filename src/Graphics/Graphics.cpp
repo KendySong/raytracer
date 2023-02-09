@@ -91,27 +91,26 @@ void Graphics::drawGui()
 	{
 		ImGui::PushID(i);
 		ImGui::Text("Sphere[%i]", i);
-		ImGui::DragFloat3("Position", &m_spheres[i].position.x, 0.01f);
-		ImGui::SliderFloat("Radius", &m_spheres[i].radius, 0, 100);
+
+		if (ImGui::TreeNode("Transform"))
+		{
+			ImGui::DragFloat3("Position", &m_spheres[i].position.x, 0.01f);
+			ImGui::SliderFloat("Radius", &m_spheres[i].radius, 0, 100);
+		}
+		
+		if (ImGui::TreeNode("Material"))
+		{
+			ImGui::DragFloat3("Color", &m_spheres[i].material.albedo.x);
+			ImGui::DragFloat("Roughness", &m_spheres[i].material.roughness);
+			ImGui::DragFloat("Metallic", &m_spheres[i].material.metallic);
+
+
+		}
+
 		ImGui::Separator();
 		ImGui::PopID();
 	}
 	ImGui::End();
-}
-
-SDL_Color Graphics::getColor(std::uint32_t colorARGB)
-{
-	SDL_Color color;
-	color.a = (colorARGB & 0xFF000000) >> 24;
-	color.r = (colorARGB & 0x00FF0000) >> 16;
-	color.g = (colorARGB & 0x0000FF00) >> 8;
-	color.b = (colorARGB & 0x00FF00FF);
-	return color;
-}
-
-SDL_Renderer* Graphics::getRenderer() noexcept
-{
-	return p_graphics;
 }
 
 void Graphics::render()
@@ -124,15 +123,37 @@ void Graphics::render()
 	SDL_RenderPresent(p_graphics);
 }
 
-std::uint32_t Graphics::getColor(std::uint8_t r, std::uint8_t g, std::uint8_t b)
+SDL_Renderer* Graphics::getRenderer() noexcept
 {
-	return 0xFF000000 | ((0x000000FF & r) << 16) | ((0x000000FF & g) << 8) | (0x000000FF & b);
+	return p_graphics;
 }
 
 void Graphics::setSpheres(std::vector<Sphere>& spheres) noexcept
 {
 	m_spheres = spheres;
 }
+
+
+SDL_Color Graphics::getColor(std::uint32_t colorARGB)
+{
+	SDL_Color color;
+	color.a = (colorARGB & 0xFF000000) >> 24;
+	color.r = (colorARGB & 0x00FF0000) >> 16;
+	color.g = (colorARGB & 0x0000FF00) >> 8;
+	color.b = (colorARGB & 0x00FF00FF);
+	return color;
+}
+
+std::uint32_t Graphics::getColor(const Vec3& colorRGB)
+{
+	return 0xFF000000 | ((0x000000FF & (std::uint8_t)colorRGB.x) << 16) | ((0x000000FF & (std::uint8_t)colorRGB.y) << 8) | (0x000000FF & (std::uint8_t)colorRGB.z);
+}
+
+std::uint32_t Graphics::getColor(std::uint8_t r, std::uint8_t g, std::uint8_t b)
+{
+	return 0xFF000000 | ((0x000000FF & r) << 16) | ((0x000000FF & g) << 8) | (0x000000FF & b);
+}
+
 
 void Graphics::draw()
 {
@@ -162,7 +183,7 @@ std::uint32_t Graphics::perPixel(Vec2& coord)
 	float lightIntensity = Math::dot(rayInfo.normal, Math::normalize(m_lightPos - rayInfo.position));
 	lightIntensity = lightIntensity < m_maximumShading ? m_maximumShading : lightIntensity > 1 ? 1 : lightIntensity;
 
-	SDL_Color pixelColor = this->getColor(rayInfo.sphere->color);
+	Vec3 pixelColor = rayInfo.sphere->material.albedo;
 	ray = Ray(rayInfo.position, Math::reflect(ray.direction, rayInfo.normal));
 
 	for (size_t i = 0; i < bounceLimit; i++)
@@ -172,15 +193,15 @@ std::uint32_t Graphics::perPixel(Vec2& coord)
 		{
 			rayInfo = this->traceRay(ray);
 			ray = Ray(rayInfo.position, Math::reflect(ray.direction, rayInfo.normal));
-			pixelColor = this->getColor(rayInfo.sphere->color);
+			Vec3 pixelColor = rayInfo.sphere->material.albedo;
 		}
 		else
 		{
 			break;
 		}
 	}
-
-	return this->getColor(pixelColor.r * lightIntensity, pixelColor.g * lightIntensity, pixelColor.b * lightIntensity);
+	
+	return this->getColor(pixelColor * lightIntensity);
 }
 
 RayInfo Graphics::traceRay(const Ray& ray)
