@@ -186,16 +186,15 @@ std::uint32_t Graphics::perPixel(Vec2& coord)
 
 		if (rayInfo.sphere == nullptr)
 		{
-			pixelColor += Vec3(0, 0, 0) * colorFactor;
+			pixelColor += Vec3(153, 178.5, 230) * colorFactor;
 			pixelColor = this->setBetween(pixelColor, 0, 255);
 			break;
 		}
 
 		float lightIntensity = Math::dot(rayInfo.normal, Math::normalize(m_lightPos - rayInfo.position));
 		lightIntensity = lightIntensity < m_maximumShading ? m_maximumShading : lightIntensity > 1 ? 1 : lightIntensity;
-
-		pixelColor += rayInfo.sphere->material.albedo * lightIntensity * colorFactor;
-		pixelColor = this->setBetween(pixelColor, 0, 255);
+		//pixelColor += rayInfo.sphere->material.albedo * lightIntensity * colorFactor;
+		//pixelColor = this->setBetween(pixelColor, 0, 255);
 
 		colorFactor *= 0.5;
 		ray = Ray(rayInfo.position, Math::reflect(ray.direction, rayInfo.normal + rayInfo.sphere->material.roughness * Random::next(-0.5, 0.5)));
