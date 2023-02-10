@@ -1,21 +1,11 @@
 #include "Random.hpp"
 
-Random::Random()
+Vec3 Random::next(float min, float max)
 {
-    m_randomEngine.seed(std::random_device()());
-}
-
-Random::Random(float min, float max)
-{
-    m_randomEngine.seed(std::random_device()());
-    m_distribution = std::uniform_real_distribution<float>(min, max);
-}
-
-Vec3 Random::next()
-{
-    return {
-        m_distribution(m_randomEngine),
-        m_distribution(m_randomEngine),
-        m_distribution(m_randomEngine)
+    return
+    {
+        min + static_cast <float> (rand()) / (static_cast <float> (RAND_MAX / (max - min))),
+        min + static_cast <float> (rand()) / (static_cast <float> (RAND_MAX / (max - min))),
+        min + static_cast <float> (rand()) / (static_cast <float> (RAND_MAX / (max - min)))
     };
 }

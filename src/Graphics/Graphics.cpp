@@ -22,7 +22,6 @@ Graphics::Graphics(SDL_Window* window, SDL_Renderer* graphics) : p_window(window
 	p_backBuffer = new std::uint32_t[0];
 	this->resetFrameBuffer();
 
-	m_randomVec = Random(-0.5, 0.5);
 	m_lightPos = Vec3(0, 0, 1);
 	m_position = Vec3(0, 0, 0);
 	m_maximumShading = 0;
@@ -188,7 +187,7 @@ std::uint32_t Graphics::perPixel(Vec2& coord)
 		if (rayInfo.sphere == nullptr)
 		{
 			pixelColor += Vec3(0, 0, 0) * colorFactor;
-			//pixelColor = this->setBetween(pixelColor, 0, 255);
+			pixelColor = this->setBetween(pixelColor, 0, 255);
 			break;
 		}
 
@@ -198,9 +197,8 @@ std::uint32_t Graphics::perPixel(Vec2& coord)
 		pixelColor += rayInfo.sphere->material.albedo * lightIntensity * colorFactor;
 		pixelColor = this->setBetween(pixelColor, 0, 255);
 
-		colorFactor *= 1;
-
-		ray = Ray(rayInfo.position, Math::reflect(ray.direction, rayInfo.normal * rayInfo.sphere->material.roughness * m_randomVec.next()));
+		colorFactor *= 0.5;
+		ray = Ray(rayInfo.position, Math::reflect(ray.direction, rayInfo.normal + rayInfo.sphere->material.roughness * Random::next(-0.5, 0.5)));
 	}
 
 	return this->getColor(pixelColor);

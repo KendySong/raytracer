@@ -52,7 +52,6 @@ private :
 	float m_timeToRender;
 	bool m_renderOnce;
 
-	Random m_randomVec;
 	std::vector<Sphere> m_spheres;
 	Vec3 m_lightPos;
 	Vec3 m_position;

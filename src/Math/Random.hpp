@@ -6,11 +6,6 @@
 class Random
 {
 public :
-    Random();
-    Random(float min, float max);
-    Vec3 next();
-
-private :
-    std::mt19937 m_randomEngine;
-    std::uniform_real_distribution<float> m_distribution;
+    Random() = default;
+    static Vec3 next(float min, float max);
 };
