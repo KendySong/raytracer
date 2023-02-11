@@ -4,9 +4,8 @@
 struct Material
 {
     Material() = default;
-    Material(Vec3 albedo, float roughness, float metallic);
+    Material(Vec3 albedo, float roughness);
 
     Vec3 albedo;
     float roughness;
-    float metallic;
 };

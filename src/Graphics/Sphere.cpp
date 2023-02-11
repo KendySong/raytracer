@@ -10,7 +10,7 @@ Sphere::Sphere(Vec3 position, float radius, Material material)
 
 Sphere::Sphere(Vec3 position, float radius)
 {
-    this->material = Material(Vec3(255, 0, 255), 0, 0);
+    this->material = Material(Vec3(255, 0, 255), 0);
     this->position = position;
     this->radius = radius;
 }

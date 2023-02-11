@@ -1,8 +1,7 @@
 #include "Material.hpp"
 
-Material::Material(Vec3 albedo, float roughness, float metallic)
+Material::Material(Vec3 albedo, float roughness)
 {
     this->albedo = albedo;
     this->roughness = roughness;
-    this->metallic = metallic;
 }
