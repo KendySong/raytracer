@@ -4,28 +4,35 @@
 #include <SDL/SDL.h>
 
 #include "Ray.hpp"
-#include "Camera.hpp"
 #include "Sphere.hpp"
+#include "RayInfo.hpp"
 #include "../Timer.hpp"
 #include "../Math/Vec3.hpp"
+#include "../Math/Vec2.hpp"
+#include "../Math/Random.hpp"
 
 class Graphics
 {
 public :
-	Graphics(SDL_Window* window, SDL_Renderer* graphics, Camera* camera);
+	Graphics(SDL_Window* window, SDL_Renderer* graphics);
 	void clear();
-	void draw();
-
-	void drawGui();
+	void drawGui(int fps);
 	void render();
 
-	static std::uint32_t getColor(std::uint8_t r, std::uint8_t g, std::uint8_t b);
-	static SDL_Color getColor(std::uint32_t colorARGB);
-
 	SDL_Renderer* getRenderer() noexcept;
-	void setSpheres(std::vector<Sphere>& spheres);
+	void setSpheres(std::vector<Sphere>& spheres) noexcept;
+
+	static std::uint32_t getColor(std::uint8_t r, std::uint8_t g, std::uint8_t b);
+	static std::uint32_t getColor(const Vec3& colorRGB);
+	static SDL_Color getColor(std::uint32_t colorARGB);
+	static Vec3 clamp(Vec3 vec, float min, float max);
 
 private :
+	void draw();
+	Vec3 perPixel(Vec2& coord);
+	RayInfo traceRay(const Ray& ray);
+	RayInfo closestHit(const Ray& ray, float hitDistance, Sphere* hitSphere);
+
 	void resetFrameBuffer();
 	void drawSwap();
 
@@ -46,8 +53,14 @@ private :
 	bool m_renderOnce;
 
 	std::vector<Sphere> m_spheres;
-	Camera* p_camera;
+	Vec3 m_position;
+	Vec3 m_skyColor;
 	Vec3 m_lightPos;
-	Sphere* p_closestSphere = nullptr;
-	float m_closestDist = FLT_MAX;
+
+	int m_maxBounce;
+	float m_maximumShading;
+
+	bool m_isPathtraced;
+	int m_frameCounter;
+	Vec3* p_accumulation;
 };

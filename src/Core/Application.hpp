@@ -3,11 +3,10 @@
 
 #include <SDL/SDL.h>
 
-#include "Timer.hpp"
-#include "Math/Vec3.hpp"
-#include "Graphics/Sphere.hpp"
-#include "Graphics/Graphics.hpp"
-#include "Graphics/Camera.hpp"
+#include "../Timer.hpp"
+#include "../Math/Vec3.hpp"
+#include "../Graphics/Sphere.hpp"
+#include "../Graphics/Graphics.hpp"
 
 class Application
 {
@@ -28,10 +27,7 @@ private :
 	bool m_isRunning;
 
 	Graphics* m_graphics;
-	std::vector<Sphere> m_spheres;
-	Camera m_camera;
 
-	Timer m_deltaTimeChrono;	
 	Timer m_framerateChrono;
 	int m_displayFPS;
 	int m_fps;
