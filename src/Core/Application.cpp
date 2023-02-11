@@ -25,12 +25,6 @@ Application::Application()
 	ImGui::CreateContext();
 	ImGui_ImplSDL2_InitForSDLRenderer(p_window, m_graphics->getRenderer());
 	ImGui_ImplSDLRenderer_Init(m_graphics->getRenderer());
-
-	//Init world
-	m_spheres.emplace_back(Vec3(0, 46.430, -20), 50, Material(Vec3(160, 160, 160), 0.025, 0));
-	m_spheres.emplace_back(Vec3(0, 0, -0.73), 0.25, Material(Vec3(160, 0, 255), 0, 0));
-	
-	m_graphics->setSpheres(m_spheres);
 }
 
 Application* Application::instance()
@@ -71,9 +65,11 @@ int Application::run()
 			}
 		}
 
+		this->countFPS();
+
 		//Render frame
 		m_graphics->clear();
-		m_graphics->drawGui();
+		m_graphics->drawGui(m_displayFPS);
 		m_graphics->render();	
 	}
 

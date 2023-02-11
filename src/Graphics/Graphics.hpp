@@ -16,7 +16,7 @@ class Graphics
 public :
 	Graphics(SDL_Window* window, SDL_Renderer* graphics);
 	void clear();
-	void drawGui();
+	void drawGui(int fps);
 	void render();
 
 	SDL_Renderer* getRenderer() noexcept;
@@ -29,7 +29,7 @@ public :
 
 private :
 	void draw();
-	std::uint32_t perPixel(Vec2& coord);
+	Vec3 perPixel(Vec2& coord);
 	RayInfo traceRay(const Ray& ray);
 	RayInfo closestHit(const Ray& ray, float hitDistance, Sphere* hitSphere);
 
@@ -53,8 +53,14 @@ private :
 	bool m_renderOnce;
 
 	std::vector<Sphere> m_spheres;
-	Vec3 m_lightPos;
 	Vec3 m_position;
 
+	Vec3 m_lightPos;
+	int m_maxBounce;
 	float m_maximumShading;
+
+	bool m_isPathtraced;
+	Vec3* p_accumulation;
+	int m_frameCounter;
+
 };

@@ -27,7 +27,6 @@ private :
 	bool m_isRunning;
 
 	Graphics* m_graphics;
-	std::vector<Sphere> m_spheres;
 
 	Timer m_framerateChrono;
 	int m_displayFPS;

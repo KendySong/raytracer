@@ -22,10 +22,18 @@ Graphics::Graphics(SDL_Window* window, SDL_Renderer* graphics) : p_window(window
 	p_backBuffer = new std::uint32_t[0];
 	this->resetFrameBuffer();
 
+	m_maxBounce = 6;
+	m_renderOnce = false;
+	m_isPathtraced = true;
+	m_frameCounter = 1;
+
 	m_lightPos = Vec3(0, 0, 1);
 	m_position = Vec3(0, 0, 0);
 	m_maximumShading = 0;
-	m_renderOnce = false;
+
+	m_spheres.emplace_back(Vec3(0, 46.430, -20), 50, Material(Vec3(160, 160, 160), 0.025, 0));
+	m_spheres.emplace_back(Vec3(-0.25, 0, -0.73), 0.25, Material(Vec3(160, 0, 255), 0, 0));
+	m_spheres.emplace_back(Vec3(0.25, 0, -0.73), 0.25, Material(Vec3(0, 160, 160), 0, 0));
 }
 
 void Graphics::clear()
@@ -39,11 +47,12 @@ void Graphics::clear()
 	ImGui::NewFrame();
 }
 
-void Graphics::drawGui()
+void Graphics::drawGui(int fps)
 {
 	SDL_RenderSetLogicalSize(p_graphics, SCREEN_X, SCREEN_Y);
-	ImGui::Begin("Render");
-		ImGui::Text("ms : %f", m_timeToRender);
+	ImGui::Begin("Graphics settings");
+		ImGui::Text("fps : %i", fps);
+		ImGui::Text("ms  : %f", m_timeToRender);		
 		ImGui::Checkbox("Render frame per frame", &m_renderOnce);
 
 		if (!m_renderOnce)
@@ -58,7 +67,15 @@ void Graphics::drawGui()
 			}
 		}
 
-		ImGui::InputInt("Bounce limit", &bounceLimit, 1);
+		ImGui::Checkbox("Pathtracing", &m_isPathtraced);
+		if (m_isPathtraced)
+		{
+			if (ImGui::Button("Reset"))
+			{
+				m_frameCounter = 1;
+			}
+		}
+		ImGui::InputInt("Bounce limit", &m_maxBounce, 1);
 		ImGui::DragFloat("Maximum shading", &m_maximumShading, 0.001f, 0, 1);
 		ImGui::Separator();
 
@@ -100,12 +117,11 @@ void Graphics::drawGui()
 		if (ImGui::TreeNode("Material"))
 		{
 			ImGui::ColorEdit3("Color", &m_spheres[i].material.albedo.x);
-			ImGui::DragFloat("Roughness", &m_spheres[i].material.roughness, 0.001);
-			ImGui::DragFloat("Metallic", &m_spheres[i].material.metallic, 0.001);
+			ImGui::DragFloat("Roughness", &m_spheres[i].material.roughness, 0.001, 0, 5);
+			ImGui::DragFloat("Metallic", &m_spheres[i].material.metallic, 0.001, 0, 5);
 			ImGui::TreePop();
 		}
 
-		ImGui::Separator();
 		ImGui::PopID();
 	}
 	ImGui::End();
@@ -162,16 +178,34 @@ std::uint32_t Graphics::getColor(std::uint8_t r, std::uint8_t g, std::uint8_t b)
 
 void Graphics::draw()
 {
+	if (m_frameCounter == 1)
+	{
+		memset(p_accumulation, 0, resolutionX * resolutionY * sizeof Vec3);
+	}
+
 	for (int y = 0; y < resolutionY; y++)
 	{
 		for (int x = 0; x < resolutionX; x++)
 		{
-			p_backBuffer[y * resolutionX + x] = this->perPixel(Vec2(x, y) / m_resolution);
+			p_accumulation[y * resolutionX + x] += this->perPixel(Vec2(x, y) / m_resolution);
+			Vec3 accumulatedColor = p_accumulation[y * resolutionX + x] / m_frameCounter;
+
+			accumulatedColor = this->setBetween(accumulatedColor, 0, 255);
+			p_backBuffer[y * resolutionX + x] = this->getColor(accumulatedColor);
 		}
+	}
+
+	if (m_isPathtraced)
+	{
+		m_frameCounter++;
+	}
+	else
+	{
+		m_frameCounter = 1;
 	}
 }
 
-std::uint32_t Graphics::perPixel(Vec2& coord)
+Vec3 Graphics::perPixel(Vec2& coord)
 {	
 	coord = coord * 2 - 1;
 	coord.x *= m_aspectRatio;
@@ -180,27 +214,25 @@ std::uint32_t Graphics::perPixel(Vec2& coord)
 	Vec3 pixelColor(0);
 	float colorFactor = 1;
 
-	for (size_t i = 0; i < bounceLimit; i++)
+	for (size_t i = 0; i < m_maxBounce; i++)
 	{
 		RayInfo rayInfo = this->traceRay(ray);
 
 		if (rayInfo.sphere == nullptr)
 		{
 			pixelColor += Vec3(153, 178.5, 230) * colorFactor;
-			pixelColor = this->setBetween(pixelColor, 0, 255);
 			break;
 		}
 
 		float lightIntensity = Math::dot(rayInfo.normal, Math::normalize(m_lightPos - rayInfo.position));
 		lightIntensity = lightIntensity < m_maximumShading ? m_maximumShading : lightIntensity > 1 ? 1 : lightIntensity;
-		//pixelColor += rayInfo.sphere->material.albedo * lightIntensity * colorFactor;
-		//pixelColor = this->setBetween(pixelColor, 0, 255);
-
+		pixelColor += rayInfo.sphere->material.albedo * lightIntensity * colorFactor;
+		
 		colorFactor *= 0.5;
 		ray = Ray(rayInfo.position, Math::reflect(ray.direction, rayInfo.normal + rayInfo.sphere->material.roughness * Random::next(-0.5, 0.5)));
 	}
 
-	return this->getColor(pixelColor);
+	return pixelColor;
 }
 
 RayInfo Graphics::traceRay(const Ray& ray)
@@ -239,6 +271,7 @@ RayInfo Graphics::traceRay(const Ray& ray)
 
 	return this->closestHit(ray, closestDist, closestSphere);
 }
+
 RayInfo Graphics::closestHit(const Ray& ray, float hitDistance, Sphere* hitSphere)
 {
 	Vec3 hit = ray.at(hitDistance);
@@ -250,10 +283,14 @@ void Graphics::resetFrameBuffer()
 {
 	delete p_frontBuffer;
 	delete p_backBuffer;
+	delete p_accumulation;
+
 	p_frontBuffer = new std::uint32_t[resolutionX * resolutionY];
 	p_backBuffer = new std::uint32_t[resolutionX * resolutionY];
+	p_accumulation = new Vec3[resolutionX * resolutionY];
 	memset(p_frontBuffer, 0, resolutionX * resolutionY * sizeof std::uint32_t);
 	memset(p_backBuffer, 0, resolutionX * resolutionY * sizeof std::uint32_t);
+	memset(p_accumulation, 0, resolutionX * resolutionY * sizeof Vec3);
 	p_frontTex = SDL_CreateTexture(p_graphics, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STREAMING, resolutionX, resolutionY);
 	p_backTex = SDL_CreateTexture(p_graphics, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STREAMING, resolutionX, resolutionY);
 }
