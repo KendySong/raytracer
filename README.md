@@ -1,10 +1,6 @@
 # raytracer
 Simple raytracing cpu based engine with SDL2
 
-<img src="/screenshots/low-resolution.png">
-<img src="/screenshots/reflect.png">
-<img src="/screenshots/high-resolution.png">
-
 ## Building
 ```git
 - git clone https://github.com/KendySong/graphics-engine.git
@@ -12,3 +8,7 @@ Simple raytracing cpu based engine with SDL2
 - premake5 vs2022
 - COPY libraries/lib/SDL2.dll build
 ```
+
+<img src="/screenshots/low-resolution.png">
+<img src="/screenshots/reflect.png">
+<img src="/screenshots/high-resolution.png">
