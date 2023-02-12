@@ -1,5 +1,5 @@
 # raytracer
-Simple raytracing cpu based engine with SDL2
+Simple cpu based raytracing engine with SDL2
 
 ## Building
 ```git
