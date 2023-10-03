@@ -1,4 +1,5 @@
 #include <windows.h>
+#include <iostream>
 
 #include <ImGui/imgui.h>
 #include <ImGui/imgui_impl_sdl.h>
@@ -25,6 +26,8 @@ Application::Application()
 	ImGui::CreateContext();
 	ImGui_ImplSDL2_InitForSDLRenderer(p_window, m_graphics->getRenderer());
 	ImGui_ImplSDLRenderer_Init(m_graphics->getRenderer());
+
+	
 }
 
 Application* Application::instance()

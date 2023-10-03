@@ -12,11 +12,11 @@ project "raytracer"
 
     includedirs "libraries/*"
     libdirs "libraries/lib"
-    links { "SDL2", "SDL2main", "SDL2_image" }
+    links { "SDL2", "SDL2main", "SDL2_image", "winmm" }
 
     filter "configurations:Release"
         optimize "Full"
-        defines "RELEASE"
+        defines "RELEASE"    
 
     filter "configurations:Debug"
         defines "Debug"

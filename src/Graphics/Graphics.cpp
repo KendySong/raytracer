@@ -1,7 +1,7 @@
 #include <cstdint>
 #include <iostream>
 
-#include <SDL/SDL_image.h>
+#include <SDL2/SDL_image.h>
 
 #include <ImGui/imgui.h>
 #include <ImGui/imgui_impl_sdl.h>
@@ -20,7 +20,8 @@ Graphics::Graphics(SDL_Window* window, SDL_Renderer* graphics) : p_window(window
 
 	p_frontBuffer = new std::uint32_t[0];
 	p_backBuffer = new std::uint32_t[0];
-	this->resetFrameBuffer();
+
+	this->resetFrameBuffer();		
 
 	m_renderOnce = false;
 	m_maximumShading = 0;
@@ -285,10 +286,12 @@ RayInfo Graphics::closestHit(const Ray& ray, float hitDistance, Sphere* hitSpher
 
 void Graphics::resetFrameBuffer()
 {
-	delete[] p_frontBuffer;
+#ifdef _MSC_VER
+    delete[] p_frontBuffer;
 	delete[] p_backBuffer;
 	delete[] p_accumulation;
-	
+#endif
+
 	m_frameCounter = 1;
 	p_frontBuffer = new std::uint32_t[resolutionX * resolutionY];
 	p_backBuffer = new std::uint32_t[resolutionX * resolutionY];

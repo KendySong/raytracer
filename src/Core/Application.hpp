@@ -1,7 +1,9 @@
 #pragma once
+#define SDL_MAIN_HANDLED
+
 #include <vector>
 
-#include <SDL/SDL.h>
+#include <SDL2/SDL.h>
 
 #include "../Timer.hpp"
 #include "../Math/Vec3.hpp"
