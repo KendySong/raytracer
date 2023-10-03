@@ -135,7 +135,7 @@ void Graphics::drawGui(int fps)
 
 void Graphics::render()
 {
-	SDL_UpdateTexture(p_frontTex, NULL, p_frontBuffer, resolutionX * sizeof std::uint32_t);
+	SDL_UpdateTexture(p_frontTex, NULL, p_frontBuffer, resolutionX * sizeof(std::uint32_t));
 	SDL_RenderCopy(p_graphics, p_frontTex, NULL, NULL);
 
 	ImGui::Render();
@@ -184,17 +184,17 @@ std::uint32_t Graphics::getColor(std::uint8_t r, std::uint8_t g, std::uint8_t b)
 
 void Graphics::draw()
 {
-
 	if (m_frameCounter == 1)
 	{
-		memset(p_accumulation, 0, resolutionX * resolutionY * sizeof Vec3);
+		memset(p_accumulation, 0, resolutionX * resolutionY * sizeof(Vec3));
 	}
 
 	for (size_t y = 0; y < resolutionY; y++)
 	{
 		for (size_t x = 0; x < resolutionX; x++)
 		{
-			p_accumulation[y * resolutionX + x] += this->perPixel(Vec2(x, y) / m_resolution);
+            Vec2 nPos = Vec2(x, y) / m_resolution;
+			p_accumulation[y * resolutionX + x] += this->perPixel(nPos);
 			Vec3 accumulatedColor = this->clamp(p_accumulation[y * resolutionX + x] / m_frameCounter, 0, 255);
 			p_backBuffer[y * resolutionX + x] = this->getColor(accumulatedColor);
 		}
@@ -293,9 +293,9 @@ void Graphics::resetFrameBuffer()
 	p_frontBuffer = new std::uint32_t[resolutionX * resolutionY];
 	p_backBuffer = new std::uint32_t[resolutionX * resolutionY];
 	p_accumulation = new Vec3[resolutionX * resolutionY];
-	memset(p_frontBuffer, 0, resolutionX * resolutionY * sizeof std::uint32_t);
-	memset(p_backBuffer, 0, resolutionX * resolutionY * sizeof std::uint32_t);
-	memset(p_accumulation, 0, resolutionX * resolutionY * sizeof Vec3);
+	memset(p_frontBuffer, 0, resolutionX * resolutionY * sizeof(std::uint32_t));
+	memset(p_backBuffer, 0, resolutionX * resolutionY * sizeof(std::uint32_t));
+	memset(p_accumulation, 0, resolutionX * resolutionY * sizeof(Vec3));
 	p_frontTex = SDL_CreateTexture(p_graphics, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STREAMING, resolutionX, resolutionY);
 	p_backTex = SDL_CreateTexture(p_graphics, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STREAMING, resolutionX, resolutionY);
 }
